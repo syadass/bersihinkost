@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Jasa Bersih-Bersih Kost Panggilan</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-peach-400 selection:text-white">
+
+    <!-- Navbar / Header Publik -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-lavender-100 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-lavender-600 rounded-2xl flex items-center justify-center text-white shadow-md">
+                <i class="fa-solid fa-broom"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold text-gray-800 tracking-tight">KostClean</h1>
+                <p class="text-[11px] font-bold text-lavender-500">Layanan Kebersihan Khusus Anak Kost</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="hidden sm:inline-block text-xs font-bold bg-lavender-50 text-lavender-600 px-4 py-2 rounded-full border border-lavender-100">
+                <i class="fa-solid fa-circle text-[8px] text-emerald-500 mr-1.5 animate-pulse"></i> Buka Hari Ini
+            </span>
+            <a href="dashboard.html" target="_blank" class="px-4 py-2 rounded-full bg-peach-500 text-white font-extrabold text-xs shadow-md hover:bg-peach-600 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-lock text-[10px]"></i> Login Pengelola
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Columns: Katalog Layanan -->
+        <div class="lg:col-span-2 flex flex-col">
+            
+            <!-- Hero Banner Promo -->
+            <div class="bg-gradient-to-r from-lavender-600 to-lavender-800 rounded-3xl p-6 sm:p-8 text-white mb-6 shadow-float relative overflow-hidden flex flex-col justify-center">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <span class="bg-white/20 text-white w-max px-3.5 py-1 rounded-full text-xs font-bold mb-3 backdrop-blur-sm">Kost Bersih, Pikiran Tenang ✨</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold mb-2 leading-tight">Kamar Berantakan? Panggil Jasa Bersih Sekarang!</h2>
+                <p class="text-lavender-100 text-sm max-w-xl font-medium">Pilih paket pembersihan favoritmu, tentukan nomor kamar, dan biarkan kamar kost kembali kinclong tanpa ribet.</p>
+            </div>
+
+            <!-- Kategori Filter -->
+            <div class="flex gap-3 mb-5 overflow-x-auto pb-2 scrollbar-hide" id="categoryContainer">
+                <button class="px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105" onclick="filterCategory('All')">
+                    <i class="fa-solid fa-star text-xs"></i> Semua Layanan
+                </button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Deep Cleaning')">
+                    <i class="fa-solid fa-spray-can-sparkles text-xs"></i> Deep Cleaning
+                </button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Kamar Mandi')">
+                    <i class="fa-solid fa-bath text-xs"></i> Kamar Mandi
+                </button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Cuci AC')">
+                    <i class="fa-solid fa-snowflake text-xs"></i> Cuci AC
+                </button>
+                <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Reguler')">
+                    <i class="fa-solid fa-broom text-xs"></i> Reguler
+                </button>
+            </div>
+
+            <!-- Grid Produk / Layanan -->
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-6">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Right Column: Form Pesanan / Keranjang Layanan -->
+        <div class="bg-white rounded-3xl shadow-card p-6 flex flex-col h-fit border border-lavender-50 sticky top-24">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+                <h3 class="text-xl font-extrabold text-gray-800">Detail Pesananmu</h3>
+                <button onclick="clearCart()" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 px-2.5 py-1 rounded-full transition-colors">Kosongkan</button>
+            </div>
+
+            <!-- Input Info Pemesan (Nomor Kamar & Nama) -->
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Nama Penghuni</label>
+                    <input type="text" id="customerName" placeholder="Contoh: Budi Santoso" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Nomor Kamar Kost</label>
+                    <input type="text" id="roomNumber" placeholder="Contoh: Kamar 12 / Lantai 2" class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+            </div>
+
+            <!-- List Layanan Terpilih -->
+            <div id="cartList" class="flex-1 max-h-60 overflow-y-auto space-y-3 mb-4 pr-1">
+                <div id="emptyCart" class="py-8 text-center text-gray-400">
+                    <i class="fa-solid fa-cart-shopping text-3xl mb-2 text-lavender-200"></i>
+                    <p class="text-sm font-bold">Belum ada layanan dipilih</p>
+                    <p class="text-xs text-gray-400">Klik salah satu layanan di samping</p>
+                </div>
+            </div>
+
+            <!-- Rincian Total Tarif -->
+            <div class="space-y-2 mb-5 border-t border-dashed border-gray-200 pt-4">
+                <div class="flex justify-between items-center text-sm font-bold text-gray-500">
+                    <span>Estimasi Pengerjaan</span>
+                    <span id="timeText">0 Menit</span>
+                </div>
+                <div class="flex justify-between items-center pt-2">
+                    <span class="text-base font-extrabold text-gray-800">Total Biaya</span>
+                    <span id="totalText" class="text-xl font-extrabold text-lavender-600">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- Tombol Kirim Pesanan -->
+            <button id="checkoutBtn" disabled onclick="checkoutOrder()" class="w-full py-3.5 rounded-2xl bg-lavender-600 text-white font-extrabold text-sm shadow-lg shadow-lavender-200 hover:bg-lavender-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex justify-center items-center gap-2">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Pesan via WhatsApp
+            </button>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-xs font-bold text-gray-400 border-t border-lavender-100 mt-auto">
+        &copy; 2026 KostClean Solo Service. Dikelola Secara Mandiri.
+    </footer>
+
+    <script>
+        const products = [
+            { id: 1, name: 'Deep Cleaning Total', category: 'Deep Cleaning', price: 75000, duration: '90 Menit', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=300&fit=crop' },
+            { id: 2, name: 'Kuras & Sikat Kamar Mandi', category: 'Kamar Mandi', price: 40000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&h=300&fit=crop' },
+            { id: 3, name: 'Cuci & Service AC Kost', category: 'Cuci AC', price: 85000, duration: '60 Menit', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=300&fit=crop' },
+            { id: 4, name: 'Bersih Ringan & Sapu Pel', category: 'Reguler', price: 25000, duration: '30 Menit', image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=300&h=300&fit=crop' },
+            { id: 5, name: 'Cuci Kasur / Vacuum Tungau', category: 'Deep Cleaning', price: 60000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=300&h=300&fit=crop' },
+            { id: 6, name: 'Pembersihan Kerak Dinding KM', category: 'Kamar Mandi', price: 45000, duration: '40 Menit', image: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=300&h=300&fit=crop' },
+        ];
+
+        let cart = [];
+        let currentFilter = 'All';
+
+        const grid = document.getElementById('productGrid');
+        const cartList = document.getElementById('cartList');
+        const emptyCart = document.getElementById('emptyCart');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
+        function init() {
+            renderGrid();
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            renderGrid();
+            
+            const buttons = document.getElementById('categoryContainer').children;
+            for(let btn of buttons) {
+                if(btn.innerText.includes(cat) || (cat === 'All' && btn.innerText.includes('Semua'))) {
+                    btn.className = "px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105";
+                } else {
+                    btn.className = "px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap";
+                }
+            }
+        }
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            const filtered = currentFilter === 'All' ? products : products.filter(p => p.category === currentFilter);
+
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3.5 rounded-3xl shadow-card hover:shadow-lg transition-all cursor-pointer flex flex-col h-full border border-lavender-50 group";
+                card.onclick = () => addToCart(product.id);
+                
+                card.innerHTML = `
+                    <div class="w-full h-32 rounded-2xl mb-3 overflow-hidden relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full text-[10px] font-extrabold text-lavender-700">
+                            ${product.duration}
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1">
+                        <span class="text-[10px] font-extrabold uppercase text-lavender-400 tracking-wider mb-1">${product.category}</span>
+                        <h4 class="text-sm font-extrabold text-gray-800 leading-tight mb-2">${product.name}</h4>
+                        <div class="mt-auto flex justify-between items-center pt-2">
+                            <span class="text-sm font-extrabold text-peach-500">${fmt.format(product.price)}</span>
+                            <span class="w-7 h-7 rounded-full bg-lavender-50 text-lavender-600 flex items-center justify-center group-hover:bg-lavender-600 group-hover:text-white transition-colors">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const exist = cart.find(item => item.product.id === id);
+            if(exist) {
+                exist.qty++;
+            } else {
+                cart.push({ product, qty: 1 });
+            }
+            updateCart();
+        }
+
+        function updateQty(id, delta) {
+            const index = cart.findIndex(item => item.product.id === id);
+            if(index > -1) {
+                cart[index].qty += delta;
+                if(cart[index].qty <= 0) cart.splice(index, 1);
+                updateCart();
+            }
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCart();
+        }
+
+        function updateCart() {
+            if(cart.length === 0) {
+                emptyCart.style.display = 'block';
+                checkoutBtn.disabled = true;
+            } else {
+                emptyCart.style.display = 'none';
+                checkoutBtn.disabled = false;
+            }
+
+            const items = cartList.querySelectorAll('.cart-item');
+            items.forEach(i => i.remove());
+
+            let subtotal = 0;
+            let totalMins = 0;
+
+            cart.forEach(item => {
+                subtotal += (item.qty * item.product.price);
+                totalMins += (item.qty * (parseInt(item.product.duration) || 30));
+
+                const div = document.createElement('div');
+                div.className = "cart-item bg-gray-50 p-3 rounded-2xl flex items-center justify-between border border-gray-100";
+                div.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <h5 class="text-xs font-extrabold text-gray-800">${item.product.name}</h5>
+                        <p class="text-[11px] font-bold text-peach-500">${fmt.format(item.product.price * item.qty)}</p>
+                    </div>
+                    <div class="flex items-center bg-white rounded-full p-1 border border-gray-200 shadow-sm">
+                        <button onclick="updateQty(${item.product.id}, -1)" class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-red-50 hover:text-red-500">
+                            <i class="fa-solid fa-minus text-[8px]"></i>
+                        </button>
+                        <span class="w-5 text-center text-xs font-bold text-gray-800">${item.qty}</span>
+                        <button onclick="updateQty(${item.product.id}, 1)" class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-lavender-50 hover:text-lavender-500">
+                            <i class="fa-solid fa-plus text-[8px]"></i>
+                        </button>
+                    </div>
+                `;
+                cartList.appendChild(div);
+            });
+
+            document.getElementById('timeText').innerText = totalMins + " Menit";
+            document.getElementById('totalText').innerText = fmt.format(subtotal);
+        }
+
+        function checkoutOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const room = document.getElementById('roomNumber').value.trim();
+
+            if(!name || !room) {
+                alert('Mohon isi Nama Penghuni dan Nomor Kamar terlebih dahulu!');
+                return;
+            }
+
+            let message = `Halo Kak Syada, saya ingin memesan jasa bersih kost:%0A%0A`;
+            message += `*Nama:* ${name}%0A`;
+            message += `*Kamar:* ${room}%0A%0A`;
+            message += `*Detail Layanan:*%0A`;
+
+            let total = 0;
+            cart.forEach(item => {
+                const sub = item.qty * item.product.price;
+                total += sub;
+                message += `- ${item.product.name} (${item.qty}x) - ${fmt.format(sub)}%0A`;
+            });
+
+            message += `%0A*Total Biaya:* ${fmt.format(total)}%0A%0AMohon konfirmasi jadwalnya ya kak. Terima kasih!`;
+
+            // Ganti nomor WhatsApp tujuan (misal nomor Anda)
+            const waNumber = "6281234567890"; 
+            window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
+        }
+
+        init();
+    </script>
+</body>
+</html>

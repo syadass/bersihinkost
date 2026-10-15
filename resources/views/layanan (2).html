@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Kelola Layanan & Kategori</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden p-4 sm:p-5 gap-5 selection:bg-peach-400 selection:text-white">
+
+    <!-- Floating Pill Sidebar -->
+    <aside class="w-24 bg-gradient-to-b from-lavender-600 to-lavender-800 rounded-[3rem] flex flex-col items-center py-8 shadow-float z-10 text-white">
+        
+        <!-- App Logo -->
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md border border-white/30 shadow-inner">
+            <i class="fa-solid fa-broom text-2xl text-white"></i>
+        </div>
+
+        <!-- Navigation Icons -->
+        <nav class="flex flex-col gap-6 w-full items-center flex-1">
+            <a href="dashboard.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Dashboard Utama">
+                <i class="fa-solid fa-chart-pie text-xl"></i>
+            </a>
+            <a href="orders.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Kelola Pesanan">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+            </a>
+            <a href="services.html" class="w-14 h-14 bg-white text-lavender-600 rounded-3xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105" title="Kelola Layanan & Harga">
+                <i class="fa-solid fa-list-check text-xl"></i>
+            </a>
+            <a href="settings.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Pengaturan">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </a>
+        </nav>
+
+        <!-- Web Publik Link -->
+        <div class="flex flex-col gap-4 mt-auto">
+            <a href="index.html" target="_blank" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Lihat Web Publik">
+                <i class="fa-solid fa-globe text-xl"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-2">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Kelola Layanan & Harga</h1>
+                <p class="text-sm font-bold text-lavender-500">Tambah, ubah, atau atur daftar jasa dan kategori pembersihan</p>
+            </div>
+            
+            <div class="flex items-center gap-3 mt-4 sm:mt-0">
+                <!-- Button Kelola Kategori -->
+                <button onclick="openCategoryModal()" class="px-5 py-3.5 rounded-3xl bg-white text-lavender-600 border border-lavender-200 font-extrabold text-sm shadow-card hover:bg-lavender-50 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-xs"></i> Kelola Kategori
+                </button>
+
+                <!-- Button Tambah Layanan -->
+                <button onclick="openServiceModal()" class="px-5 py-3.5 rounded-3xl bg-lavender-600 text-white font-extrabold text-sm shadow-lg shadow-lavender-200 hover:bg-lavender-700 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-xs"></i> Tambah Layanan
+                </button>
+                
+                <!-- Owner Profile -->
+                <div class="hidden md:flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100">
+                    <div class="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
+                        SY
+                    </div>
+                    <div>
+                        <p class="text-sm font-extrabold text-gray-800 leading-tight">Syada Saleha</p>
+                        <p class="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Services Grid Container -->
+        <div class="flex-1 overflow-y-auto pb-6 pr-2">
+            <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form Tambah/Edit Layanan -->
+    <div id="serviceModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-float w-full max-w-md p-7 border border-lavender-50 relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-5">
+                <h3 id="serviceModalTitle" class="text-xl font-extrabold text-gray-800">Tambah Layanan Baru</h3>
+                <button onclick="closeServiceModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form id="serviceForm" onsubmit="saveService(event)" class="space-y-4">
+                <input type="hidden" id="serviceId">
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Nama Layanan</label>
+                    <input type="text" id="serviceName" required placeholder="Contoh: Vacuum Kasur" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Kategori</label>
+                    <select id="serviceCategory" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                        <!-- Options injected dynamically from categories list -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-extrabold text-gray-600 mb-1">Tarif (Rp)</label>
+                        <input type="number" id="servicePrice" required placeholder="50000" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-gray-600 mb-1">Estimasi Durasi</label>
+                        <input type="text" id="serviceDuration" required placeholder="45 Menit" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold text-gray-600 mb-1">URL Gambar (Unsplash)</label>
+                    <input type="url" id="serviceImage" required placeholder="https://images.unsplash.com/..." class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeServiceModal()" class="flex-1 py-3.5 rounded-2xl bg-gray-100 text-gray-600 font-extrabold text-sm hover:bg-gray-200 transition-colors">Batal</button>
+                    <button type="submit" class="flex-1 py-3.5 rounded-2xl bg-lavender-600 text-white font-extrabold text-sm shadow-md hover:bg-lavender-700 transition-all">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Kelola Kategori -->
+    <div id="categoryModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-float w-full max-w-lg p-7 border border-lavender-50 relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h3 class="text-xl font-extrabold text-gray-800">Kelola Kategori Layanan</h3>
+                    <p class="text-xs font-semibold text-gray-400">Tambah, ubah, atau hapus kategori</p>
+                </div>
+                <button onclick="closeCategoryModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Form Tambah / Edit Kategori -->
+            <form id="categoryForm" onsubmit="saveCategory(event)" class="bg-lavender-50/50 p-4 rounded-2xl border border-lavender-100 mb-5 flex gap-2">
+                <input type="hidden" id="categoryId">
+                <input type="text" id="categoryNameInput" required placeholder="Nama Kategori Baru..." class="flex-1 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                <button type="submit" id="categorySubmitBtn" class="px-5 py-2.5 rounded-xl bg-lavender-600 text-white font-extrabold text-xs shadow-md hover:bg-lavender-700 transition-all">
+                    Tambah
+                </button>
+                <button type="button" id="categoryCancelBtn" onclick="resetCategoryForm()" class="hidden px-3 py-2.5 rounded-xl bg-gray-200 text-gray-600 font-extrabold text-xs hover:bg-gray-300 transition-all">
+                    Batal
+                </button>
+            </form>
+
+            <!-- List Kategori -->
+            <div class="max-h-60 overflow-y-auto space-y-2 pr-1" id="categoryListContainer">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-100 text-right">
+                <button type="button" onclick="closeCategoryModal()" class="px-6 py-3 rounded-2xl bg-lavender-600 text-white font-extrabold text-xs shadow-md hover:bg-lavender-700 transition-all">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Kategori
+        let categories = ['Deep Cleaning', 'Kamar Mandi', 'Cuci AC', 'Reguler'];
+
+        // Data Layanan Jasa Bersih Kost
+        let services = [
+            { id: 1, name: 'Deep Cleaning Total', category: 'Deep Cleaning', price: 75000, duration: '90 Menit', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=300&fit=crop' },
+            { id: 2, name: 'Kuras & Sikat Kamar Mandi', category: 'Kamar Mandi', price: 40000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&h=300&fit=crop' },
+            { id: 3, name: 'Cuci & Service AC Kost', category: 'Cuci AC', price: 85000, duration: '60 Menit', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=300&fit=crop' },
+            { id: 4, name: 'Bersih Ringan & Sapu Pel', category: 'Reguler', price: 25000, duration: '30 Menit', image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=300&h=300&fit=crop' },
+            { id: 5, name: 'Cuci Kasur / Vacuum Tungau', category: 'Deep Cleaning', price: 60000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=300&h=300&fit=crop' },
+            { id: 6, name: 'Pembersihan Kerak Dinding KM', category: 'Kamar Mandi', price: 45000, duration: '40 Menit', image: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=300&h=300&fit=crop' },
+        ];
+
+        const servicesGrid = document.getElementById('servicesGrid');
+        const serviceModal = document.getElementById('serviceModal');
+        const serviceModalTitle = document.getElementById('serviceModalTitle');
+        const serviceForm = document.getElementById('serviceForm');
+        const serviceCategorySelect = document.getElementById('serviceCategory');
+
+        const categoryModal = document.getElementById('categoryModal');
+        const categoryListContainer = document.getElementById('categoryListContainer');
+        const categoryNameInput = document.getElementById('categoryNameInput');
+        const categoryIdInput = document.getElementById('categoryId');
+        const categorySubmitBtn = document.getElementById('categorySubmitBtn');
+        const categoryCancelBtn = document.getElementById('categoryCancelBtn');
+
+        const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
+        function initApp() {
+            renderServices();
+            updateCategoryDropdown();
+        }
+
+        function renderServices() {
+            servicesGrid.innerHTML = '';
+
+            services.forEach(service => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between group hover:shadow-lg transition-all";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="w-full h-36 rounded-2xl mb-3 overflow-hidden relative">
+                            <img src="${service.image}" alt="${service.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-extrabold text-lavender-700 shadow-sm">
+                                <i class="fa-regular fa-clock mr-1"></i>${service.duration}
+                            </div>
+                            <span class="absolute top-2 left-2 bg-lavender-600 text-white px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-sm">
+                                ${service.category}
+                            </span>
+                        </div>
+                        <h3 class="text-base font-extrabold text-gray-800 mb-1 leading-tight">${service.name}</h3>
+                        <p class="text-lg font-extrabold text-peach-500 mb-4">${fmt.format(service.price)}</p>
+                    </div>
+                    
+                    <div class="flex gap-2 pt-3 border-t border-gray-100">
+                        <button onclick="editService(${service.id})" class="flex-1 py-2.5 rounded-xl bg-lavender-50 text-lavender-600 text-xs font-extrabold hover:bg-lavender-100 transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-pen-to-square"></i> Ubah
+                        </button>
+                        <button onclick="deleteService(${service.id})" class="w-10 py-2.5 rounded-xl bg-red-50 text-red-500 text-xs font-extrabold hover:bg-red-100 transition-colors flex items-center justify-center" title="Hapus Layanan">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                servicesGrid.appendChild(card);
+            });
+        }
+
+        function updateCategoryDropdown() {
+            serviceCategorySelect.innerHTML = '';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                serviceCategorySelect.appendChild(opt);
+            });
+        }
+
+        // --- Layanan Modals ---
+        function openServiceModal() {
+            serviceModalTitle.innerText = "Tambah Layanan Baru";
+            serviceForm.reset();
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceImage').value = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=300&fit=crop';
+            updateCategoryDropdown();
+            serviceModal.classList.remove('hidden');
+        }
+
+        function closeServiceModal() {
+            serviceModal.classList.add('hidden');
+        }
+
+        function editService(id) {
+            const service = services.find(s => s.id === id);
+            if(service) {
+                serviceModalTitle.innerText = "Ubah Layanan & Harga";
+                document.getElementById('serviceId').value = service.id;
+                document.getElementById('serviceName').value = service.name;
+                updateCategoryDropdown();
+                document.getElementById('serviceCategory').value = service.category;
+                document.getElementById('servicePrice').value = service.price;
+                document.getElementById('serviceDuration').value = service.duration;
+                document.getElementById('serviceImage').value = service.image;
+                serviceModal.classList.remove('hidden');
+            }
+        }
+
+        function saveService(e) {
+            e.preventDefault();
+            const id = document.getElementById('serviceId').value;
+            const name = document.getElementById('serviceName').value;
+            const category = document.getElementById('serviceCategory').value;
+            const price = parseFloat(document.getElementById('servicePrice').value);
+            const duration = document.getElementById('serviceDuration').value;
+            const image = document.getElementById('serviceImage').value;
+
+            if(id) {
+                const index = services.findIndex(s => s.id == id);
+                if(index > -1) {
+                    services[index] = { id: Number(id), name, category, price, duration, image };
+                }
+            } else {
+                const newId = services.length > 0 ? Math.max(...services.map(s => s.id)) + 1 : 1;
+                services.push({ id: newId, name, category, price, duration, image });
+            }
+
+            closeServiceModal();
+            renderServices();
+        }
+
+        function deleteService(id) {
+            if(confirm('Yakin ingin menghapus layanan ini dari daftar?')) {
+                services = services.filter(s => s.id !== id);
+                renderServices();
+            }
+        }
+
+        // --- Kategori Modals & CRUD ---
+        function openCategoryModal() {
+            renderCategoryList();
+            resetCategoryForm();
+            categoryModal.classList.remove('hidden');
+        }
+
+        function closeCategoryModal() {
+            categoryModal.classList.add('hidden');
+            updateCategoryDropdown();
+            renderServices();
+        }
+
+        function renderCategoryList() {
+            categoryListContainer.innerHTML = '';
+
+            if(categories.length === 0) {
+                categoryListContainer.innerHTML = `<p class="text-center text-xs text-gray-400 py-4 font-bold">Belum ada kategori.</p>`;
+                return;
+            }
+
+            categories.forEach((cat, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-gray-50 px-4 py-3 rounded-2xl flex items-center justify-between border border-gray-100";
+
+                div.innerHTML = `
+                    <span class="text-sm font-extrabold text-gray-800">${cat}</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="editCategory(${index})" class="px-3 py-1.5 rounded-xl bg-lavender-50 text-lavender-600 text-xs font-extrabold hover:bg-lavender-100 transition-colors">
+                            <i class="fa-solid fa-pen mr-1"></i> Ubah
+                        </button>
+                        <button onclick="deleteCategory(${index})" class="px-3 py-1.5 rounded-xl bg-red-50 text-red-500 text-xs font-extrabold hover:bg-red-100 transition-colors">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Hapus
+                        </button>
+                    </div>
+                `;
+                categoryListContainer.appendChild(div);
+            });
+        }
+
+        function saveCategory(e) {
+            e.preventDefault();
+            const catName = categoryNameInput.value.trim();
+            const editIndex = categoryIdInput.value;
+
+            if(!catName) return;
+
+            if(editIndex !== "") {
+                // Edit existing
+                const oldName = categories[editIndex];
+                categories[editIndex] = catName;
+                // Update associated services category name too
+                services.forEach(s => {
+                    if(s.category === oldName) s.category = catName;
+                });
+            } else {
+                // Add new
+                if(categories.includes(catName)) {
+                    alert('Kategori sudah ada!');
+                    return;
+                }
+                categories.push(catName);
+            }
+
+            renderCategoryList();
+            resetCategoryForm();
+        }
+
+        function editCategory(index) {
+            categoryIdInput.value = index;
+            categoryNameInput.value = categories[index];
+            categorySubmitBtn.innerText = "Perbarui";
+            categoryCancelBtn.classList.remove('hidden');
+            categoryNameInput.focus();
+        }
+
+        function deleteCategory(index) {
+            const catToDelete = categories[index];
+            // Check if in use
+            const inUse = services.some(s => s.category === catToDelete);
+            if(inUse) {
+                alert(`Kategori "${catToDelete}" sedang digunakan oleh beberapa layanan. Ubah atau hapus layanan tersebut terlebih dahulu.`);
+                return;
+            }
+
+            if(confirm(`Yakin ingin menghapus kategori "${catToDelete}"?`)) {
+                categories.splice(index, 1);
+                renderCategoryList();
+                resetCategoryForm();
+            }
+        }
+
+        function resetCategoryForm() {
+            categoryIdInput.value = "";
+            categoryNameInput.value = "";
+            categorySubmitBtn.innerText = "Tambah";
+            categoryCancelBtn.classList.add('hidden');
+        }
+
+        initApp();
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Detail Pesanan & Jadwal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden p-4 sm:p-5 gap-5 selection:bg-peach-400 selection:text-white">
+
+    <!-- Floating Pill Sidebar -->
+    <aside class="w-24 bg-gradient-to-b from-lavender-600 to-lavender-800 rounded-[3rem] flex flex-col items-center py-8 shadow-float z-10 text-white">
+        
+        <!-- App Logo -->
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md border border-white/30 shadow-inner">
+            <i class="fa-solid fa-broom text-2xl text-white"></i>
+        </div>
+
+        <!-- Navigation Icons -->
+        <nav class="flex flex-col gap-6 w-full items-center flex-1">
+            <a href="dashboard.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Dashboard Utama">
+                <i class="fa-solid fa-chart-pie text-xl"></i>
+            </a>
+            <a href="orders.html" class="w-14 h-14 bg-white text-lavender-600 rounded-3xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105" title="Kelola Pesanan">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+            </a>
+            <a href="services.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Kelola Layanan">
+                <i class="fa-solid fa-list-check text-xl"></i>
+            </a>
+            <a href="settings.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Pengaturan">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </a>
+        </nav>
+
+        <!-- Web Publik Link -->
+        <div class="flex flex-col gap-4 mt-auto">
+            <a href="index.html" target="_blank" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Lihat Web Publik">
+                <i class="fa-solid fa-globe text-xl"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent overflow-y-auto pr-2 pb-6">
+        
+        <!-- Header & Back Button -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-2">
+            <div class="flex items-center gap-4">
+                <a href="orders.html" class="w-11 h-11 rounded-2xl bg-white text-lavender-600 shadow-card flex items-center justify-center hover:bg-lavender-50 transition-colors border border-lavender-100">
+                    <i class="fa-solid fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight" id="orderIdTitle">ORD-001</h1>
+                        <span id="statusBadge" class="px-3 py-1 rounded-full text-xs font-extrabold border bg-amber-100 text-amber-700 border-amber-200">Menunggu</span>
+                    </div>
+                    <p class="text-sm font-bold text-lavender-500">Detail pesanan, alamat, jadwal booking, dan aksi pengerjaan</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 mt-4 sm:mt-0">
+                <a id="waChatBtn" href="#" target="_blank" class="px-5 py-3 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs shadow-md hover:bg-emerald-700 transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Chat Penghuni
+                </a>
+            </div>
+        </header>
+
+        <!-- Single Comprehensive Card Layout -->
+        <div class="max-w-4xl bg-white rounded-[2.5rem] shadow-card border border-lavender-50 p-6 sm:p-8 space-y-6">
+            
+            <!-- Section 1: Informasi Pemesan & Alamat -->
+            <div>
+                <h3 class="text-base font-extrabold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fa-solid fa-user-tag text-lavender-500"></i> Informasi Penghuni & Alamat Tujuan
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-xs font-bold text-gray-400 block mb-1">Nama Lengkap</span>
+                        <span class="font-extrabold text-gray-800 text-base" id="customerName">Rian Pratama</span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-xs font-bold text-gray-400 block mb-1">Nomor WhatsApp</span>
+                        <span class="font-extrabold text-gray-800 text-base" id="customerPhone">0812-3456-7890</span>
+                    </div>
+                    <div class="sm:col-span-2 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <span class="text-xs font-bold text-gray-400 block mb-1">Alamat / Detail Lokasi Kost</span>
+                        <span class="font-extrabold text-peach-600 text-base block" id="customerAddress">Kost Mawar Indah, Jl. Pleburan Barat No. 12 (Kamar 05)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Informasi Dua Tanggal (Order Masuk & Tanggal Booking) -->
+            <div>
+                <h3 class="text-base font-extrabold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-lavender-500"></i> Jadwal & Waktu
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-lavender-50/50 p-4 rounded-2xl border border-lavender-100">
+                        <span class="text-xs font-bold text-lavender-600 block mb-1"><i class="fa-solid fa-clock mr-1"></i> Tanggal Order Masuk</span>
+                        <span class="font-extrabold text-gray-800 text-base" id="orderCreatedDate">12 Oktober 2026, 10:30 WIB</span>
+                    </div>
+                    <div class="bg-peach-50/50 p-4 rounded-2xl border border-peach-100">
+                        <span class="text-xs font-bold text-peach-600 block mb-1"><i class="fa-solid fa-calendar-check mr-1"></i> Tanggal Booking Pengerjaan</span>
+                        <span class="font-extrabold text-gray-800 text-base" id="bookingDate">13 Oktober 2026 (Sesi Pagi - 09:00 WIB)</span>
+                    </div>
+                </div>
+                <div class="mt-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                    <span class="text-xs font-bold text-gray-400 block mb-1">Catatan Tambahan dari Penghuni:</span>
+                    <p class="text-xs font-semibold text-gray-700 italic" id="orderNotes">"Tolong bagian kamar mandi dibersihkan ekstra ya kak karena keraknya agak tebal."</p>
+                </div>
+            </div>
+
+            <!-- Section 3: Rincian Layanan & Total -->
+            <div>
+                <h3 class="text-base font-extrabold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping text-lavender-500"></i> Rincian Layanan & Estimasi Durasi
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="text-gray-400 text-xs font-extrabold uppercase border-b border-gray-100 pb-2">
+                                <th class="pb-3">Jenis Layanan</th>
+                                <th class="pb-3 text-center">Estimasi Durasi</th>
+                                <th class="pb-3 text-center">Jumlah</th>
+                                <th class="pb-3 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 font-semibold text-gray-700" id="itemsTableBody">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <span class="text-xs font-bold text-gray-400 block">Total Estimasi Pengerjaan:</span>
+                        <span class="text-sm font-extrabold text-lavender-600" id="totalDurationText">90 Menit</span>
+                    </div>
+                    <div class="text-right sm:text-left">
+                        <span class="text-xs font-bold text-gray-400 block">Total Biaya:</span>
+                        <span class="text-2xl font-extrabold text-peach-500" id="totalPriceText">Rp 75.000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Aksi Pengelola (Digabung dalam Card yang Sama) -->
+            <div class="pt-4 border-t-2 border-dashed border-lavender-100">
+                <h3 class="text-base font-extrabold text-gray-800 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-lavender-500"></i> Kontrol Aksi Pengelola
+                </h3>
+                <p class="text-xs font-semibold text-gray-400 mb-4">Ubah status pengerjaan atau kelola pesanan ini secara mandiri:</p>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-3" id="actionButtonsContainer">
+                    <!-- Tombol aksi dinamis via JS -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Simulasi data detail pesanan dengan Alamat dan Dua Tanggal
+        let orderData = {
+            id: 'ORD-001',
+            name: 'Rian Pratama',
+            address: 'Kost Mawar Indah, Jl. Pleburan Barat No. 12 (Kamar 05)',
+            phone: '6281234567890',
+            orderDate: '12 Oktober 2026, 10:30 WIB',
+            bookingDate: '13 Oktober 2026 (Sesi Pagi - 09:00 WIB)',
+            status: 'Menunggu',
+            notes: 'Tolong bagian kamar mandi dibersihkan ekstra ya kak karena keraknya agak tebal.',
+            items: [
+                { name: 'Deep Cleaning Total', duration: '90 Menit', qty: 1, price: 75000 }
+            ],
+            total: 75000
+        };
+
+        const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
+        function renderOrderDetail() {
+            document.getElementById('orderIdTitle').innerText = orderData.id;
+            document.getElementById('customerName').innerText = orderData.name;
+            document.getElementById('customerAddress').innerText = orderData.address;
+            document.getElementById('customerPhone').innerText = orderData.phone;
+            document.getElementById('orderCreatedDate').innerText = orderData.orderDate;
+            document.getElementById('bookingDate').innerText = orderData.bookingDate;
+            document.getElementById('orderNotes').innerText = `"${orderData.notes}"`;
+            document.getElementById('totalPriceText').innerText = fmt.format(orderData.total);
+
+            // WhatsApp link
+            const waMsg = `Halo Kak ${orderData.name}, terkait pesanan ${orderData.id} untuk alamat ${orderData.address}...`;
+            document.getElementById('waChatBtn').href = `https://wa.me/${orderData.phone}?text=${encodeURIComponent(waMsg)}`;
+
+            // Badge status
+            const badge = document.getElementById('statusBadge');
+            badge.innerText = orderData.status;
+            if(orderData.status === 'Menunggu') {
+                badge.className = "px-3 py-1 rounded-full text-xs font-extrabold border bg-amber-100 text-amber-700 border-amber-200";
+            } else if(orderData.status === 'Proses') {
+                badge.className = "px-3 py-1 rounded-full text-xs font-extrabold border bg-lavender-100 text-lavender-700 border-lavender-200";
+            } else if(orderData.status === 'Selesai') {
+                badge.className = "px-3 py-1 rounded-full text-xs font-extrabold border bg-emerald-100 text-emerald-700 border-emerald-200";
+            }
+
+            // Items table
+            const tbody = document.getElementById('itemsTableBody');
+            tbody.innerHTML = '';
+            let totalMins = 0;
+
+            orderData.items.forEach(item => {
+                totalMins += (item.qty * 90);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 font-extrabold text-gray-800">${item.name}</td>
+                    <td class="py-3 text-center text-gray-500">${item.duration}</td>
+                    <td class="py-3 text-center text-gray-800 font-extrabold">${item.qty}x</td>
+                    <td class="py-3 text-right font-extrabold text-peach-500">${fmt.format(item.price * item.qty)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('totalDurationText').innerText = totalMins + " Menit";
+
+            // Action buttons inside the unified card
+            const actionContainer = document.getElementById('actionButtonsContainer');
+            actionContainer.innerHTML = '';
+
+            if(orderData.status === 'Menunggu') {
+                actionContainer.innerHTML = `
+                    <button onclick="changeStatus('Proses')" class="flex-1 py-3.5 rounded-2xl bg-lavender-600 text-white font-extrabold text-xs shadow-md hover:bg-lavender-700 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i> Mulai Kerjakan Pesanan Ini
+                    </button>
+                    <button onclick="deleteThisOrder()" class="py-3.5 px-6 rounded-2xl bg-red-50 text-red-500 font-extrabold text-xs hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Hapus
+                    </button>
+                `;
+            } else if(orderData.status === 'Proses') {
+                actionContainer.innerHTML = `
+                    <button onclick="changeStatus('Selesai')" class="flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs shadow-md hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> Tandai Selesai Dibersihkan
+                    </button>
+                    <button onclick="deleteThisOrder()" class="py-3.5 px-6 rounded-2xl bg-red-50 text-red-500 font-extrabold text-xs hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Hapus
+                    </button>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <div class="flex-1 bg-emerald-50 text-emerald-700 p-3.5 rounded-2xl text-center font-extrabold text-xs border border-emerald-100 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check text-base"></i> Pengerjaan Telah Selesai
+                    </div>
+                    <button onclick="deleteThisOrder()" class="py-3.5 px-6 rounded-2xl bg-red-50 text-red-500 font-extrabold text-xs hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Hapus
+                    </button>
+                `;
+            }
+        }
+
+        function changeStatus(newStatus) {
+            orderData.status = newStatus;
+            renderOrderDetail();
+            alert(`Status pesanan berhasil diubah menjadi: ${newStatus}`);
+        }
+
+        function deleteThisOrder() {
+            if(confirm('Yakin ingin menghapus pesanan ini?')) {
+                alert('Pesanan dihapus.');
+                window.location.href = 'orders.html';
+            }
+        }
+
+        renderOrderDetail();
+    </script>
+</body>
+</html>

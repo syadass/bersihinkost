@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean Manager - Solo Cleaning Service</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden p-4 sm:p-5 gap-5 selection:bg-peach-400 selection:text-white">
+
+    <!-- Floating Pill Sidebar (Solo Management Focus) -->
+    <aside class="w-24 bg-gradient-to-b from-lavender-600 to-lavender-800 rounded-[3rem] flex flex-col items-center py-8 shadow-float z-10 text-white">
+        
+        <!-- App Logo -->
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md border border-white/30 shadow-inner">
+            <i class="fa-solid fa-broom text-2xl text-white"></i>
+        </div>
+
+        <!-- Navigation Icons -->
+        <nav class="flex flex-col gap-6 w-full items-center flex-1">
+            <button class="w-14 h-14 bg-white rounded-3xl flex items-center justify-center text-lavender-600 shadow-lg transform transition-transform hover:scale-105" title="Dashboard Utama">
+                <i class="fa-solid fa-chart-pie text-xl"></i>
+            </button>
+            <button class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Jadwal Hari Ini">
+                <i class="fa-solid fa-calendar-check text-xl"></i>
+            </button>
+            <button class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Kelola Layanan & Harga">
+                <i class="fa-solid fa-list-check text-xl"></i>
+            </button>
+        </nav>
+
+        <!-- Settings -->
+        <div class="flex flex-col gap-4 mt-auto">
+            <button class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Pengaturan">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Middle Section: Main Dashboard Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent">
+        
+        <!-- Header & Solo Owner Profile -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-2">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">KostClean Solo Dashboard</h1>
+                <p class="text-sm font-bold text-lavender-500">Senin, 12 Okt 2026 • Jadwal & Pemasukan Mandiri</p>
+            </div>
+            
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <!-- Search Bar -->
+                <div class="relative w-64 md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-5 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Cari kamar atau layanan..." class="w-full pl-12 pr-4 py-3.5 rounded-3xl bg-white border-none shadow-card text-sm font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 transition-all">
+                </div>
+                
+                <!-- Owner Profile (Solo) -->
+                <div class="flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card cursor-pointer hover:bg-lavender-50 transition-colors border border-lavender-100">
+                    <div class="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
+                        SY
+                    </div>
+                    <div>
+                        <p class="text-sm font-extrabold text-gray-800 leading-tight">Syada Saleha</p>
+                        <p class="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Stats & Chart Area -->
+        <div class="flex gap-5 mb-6">
+            <div class="bg-white rounded-3xl shadow-card p-5 flex-1 flex flex-col justify-between border border-lavender-50">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-sm font-extrabold text-gray-800">Pendapatan Bersih Mingguan</h3>
+                    <span class="bg-peach-100 text-peach-600 px-3 py-1 rounded-full text-xs font-bold">+20% vs Pekan Lalu</span>
+                </div>
+                <div class="h-28 w-full">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            <div class="hidden lg:flex w-64 bg-gradient-to-br from-peach-400 to-peach-500 rounded-3xl shadow-card p-6 flex-col justify-center text-white relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
+                <h3 class="text-sm font-bold text-white/80 mb-1">Total Kas Bulan Ini</h3>
+                <p class="text-3xl font-extrabold mb-2">Rp 1.450.000</p>
+                <p class="text-xs font-semibold text-white/90"><i class="fa-solid fa-circle-check mr-1"></i> 12 Kamar Selesai Dibersihkan</p>
+            </div>
+        </div>
+
+        <!-- Filter Menu Pilihan Jenis Layanan Kost -->
+        <div class="flex gap-3 mb-5 overflow-x-auto pb-2 scrollbar-hide" id="categoryContainer">
+            <button class="px-6 py-3 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105" onclick="filterCategory('All')">
+                <i class="fa-solid fa-star text-xs"></i> Semua Layanan
+            </button>
+            <button class="px-6 py-3 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Deep Cleaning')">
+                <i class="fa-solid fa-spray-can-sparkles text-xs"></i> Deep Cleaning
+            </button>
+            <button class="px-6 py-3 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Kamar Mandi')">
+                <i class="fa-solid fa-bath text-xs"></i> Kamar Mandi
+            </button>
+            <button class="px-6 py-3 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Cuci AC')">
+                <i class="fa-solid fa-snowflake text-xs"></i> Cuci AC
+            </button>
+            <button class="px-6 py-3 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterCategory('Reguler')">
+                <i class="fa-solid fa-broom text-xs"></i> Reguler Mingguan
+            </button>
+        </div>
+
+        <!-- Service / Price Management Grid -->
+        <div class="flex-1 overflow-y-auto pb-6 pr-2">
+            <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Right Panel: Queue / Personal Schedule Booking Manager -->
+    <aside class="w-[380px] bg-white rounded-[2.5rem] shadow-float flex flex-col z-10 overflow-hidden border border-lavender-50">
+        
+        <!-- Header Panel -->
+        <div class="px-7 pt-7 pb-4 bg-white">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-2xl font-extrabold text-gray-800">Jadwal & Order Masuk</h2>
+                <button onclick="clearCart()" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors" title="Reset Antrean">
+                    <i class="fa-solid fa-trash-can text-sm"></i>
+                </button>
+            </div>
+            <div class="flex gap-2">
+                <span class="bg-lavender-100 text-lavender-700 text-xs font-bold px-3 py-1 rounded-full">Status: Siap Eksekusi</span>
+                <span class="bg-peach-100 text-peach-600 text-xs font-bold px-3 py-1 rounded-full">Dikerjakan Sendiri</span>
+            </div>
+        </div>
+
+        <!-- Active Tasks / Booking List -->
+        <div id="cartList" class="flex-1 overflow-y-auto px-5 py-2 space-y-4">
+            <!-- Empty State -->
+            <div id="emptyCart" class="h-full flex flex-col items-center justify-center text-center opacity-70">
+                <div class="w-24 h-24 rounded-full bg-lavender-50 text-lavender-300 flex items-center justify-center text-4xl mb-4 border-2 border-dashed border-lavender-200">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <p class="text-lg font-extrabold text-gray-700">Belum ada jadwal dipilih</p>
+                <p class="text-sm font-semibold text-gray-400 mt-1">Klik layanan untuk menambah antrean pengerjaan anda</p>
+            </div>
+        </div>
+
+        <!-- Summary & Action Button -->
+        <div class="p-6 bg-gray-50/50 border-t border-gray-100 rounded-t-[2rem]">
+            <div class="space-y-3 mb-5">
+                <div class="flex justify-between items-center text-sm font-bold text-gray-500">
+                    <span>Estimasi Waktu Total</span>
+                    <span id="timeText">0 Menit</span>
+                </div>
+                <div class="flex justify-between items-center pt-3 mt-1 border-t border-dashed border-gray-300">
+                    <span class="text-xl font-extrabold text-gray-800">Total Tarif</span>
+                    <span id="totalText" class="text-2xl font-extrabold text-lavender-600">Rp 0</span>
+                </div>
+            </div>
+
+            <button id="payBtn" disabled class="w-full py-4 rounded-3xl bg-lavender-600 text-white font-extrabold text-lg shadow-lg shadow-lavender-200 hover:bg-lavender-700 hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex justify-center items-center gap-3">
+                <i class="fa-solid fa-circle-check"></i>
+                Simpan & Tandai Jadwal
+            </button>
+        </div>
+    </aside>
+
+    <script>
+        Chart.defaults.font.family = "'Nunito', sans-serif";
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                datasets: [{
+                    label: 'Pendapatan (Ribu Rp)',
+                    data: [150, 200, 120, 300, 250, 400, 350],
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#8b5cf6',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10, weight: 'bold' }, color: '#9ca3af' }
+                    },
+                    y: {
+                        display: false,
+                        grid: { display: false },
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        // Daftar Layanan Jasa Bersih Kost (Dikelola Sendiri)
+        const products = [
+            { id: 1, name: 'Deep Cleaning Total', category: 'Deep Cleaning', price: 75000, duration: '90 Menit', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=300&fit=crop' },
+            { id: 2, name: 'Kuras & Sikat Kamar Mandi', category: 'Kamar Mandi', price: 40000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&h=300&fit=crop' },
+            { id: 3, name: 'Cuci & Service AC Kost', category: 'Cuci AC', price: 85000, duration: '60 Menit', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=300&fit=crop' },
+            { id: 4, name: 'Bersih Ringan & Sapu Pel', category: 'Reguler', price: 25000, duration: '30 Menit', image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=300&h=300&fit=crop' },
+            { id: 5, name: 'Cuci Kasur / Vacuum Tungau', category: 'Deep Cleaning', price: 60000, duration: '45 Menit', image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=300&h=300&fit=crop' },
+            { id: 6, name: 'Pembersihan Kerak Dinding KM', category: 'Kamar Mandi', price: 45000, duration: '40 Menit', image: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=300&h=300&fit=crop' },
+        ];
+
+        let cart = [];
+        let currentFilter = 'All';
+        let searchQuery = '';
+
+        const grid = document.getElementById('productGrid');
+        const cartList = document.getElementById('cartList');
+        const emptyCart = document.getElementById('emptyCart');
+        const payBtn = document.getElementById('payBtn');
+        const searchInput = document.getElementById('searchInput');
+
+        const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
+        function init() {
+            renderGrid();
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderGrid();
+            });
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            renderGrid();
+            
+            const buttons = document.getElementById('categoryContainer').children;
+            for(let btn of buttons) {
+                if(btn.innerText.includes(cat) || (cat === 'All' && btn.innerText.includes('Semua'))) {
+                    btn.className = "px-6 py-3 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105";
+                } else {
+                    btn.className = "px-6 py-3 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap";
+                }
+            }
+        }
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            
+            const filtered = products.filter(p => {
+                const matchCat = currentFilter === 'All' || p.category === currentFilter;
+                const matchSearch = p.name.toLowerCase().includes(searchQuery);
+                return matchCat && matchSearch;
+            });
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 font-bold">Layanan tidak ditemukan.</div>`;
+                return;
+            }
+
+            filtered.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-3xl shadow-card hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-1 flex flex-col h-full border border-lavender-50 group";
+                card.onclick = () => addToCart(product.id);
+                
+                card.innerHTML = `
+                    <div class="w-full h-32 rounded-2xl mb-3 overflow-hidden relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] font-extrabold text-lavender-700">
+                            <i class="fa-regular fa-clock mr-1"></i>${product.duration}
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 px-2 pb-1">
+                        <span class="text-[10px] font-extrabold uppercase text-lavender-400 tracking-wider mb-1">${product.category}</span>
+                        <h3 class="text-sm font-extrabold text-gray-800 leading-tight mb-2">${product.name}</h3>
+                        <div class="mt-auto flex justify-between items-center">
+                            <span class="text-sm font-extrabold text-peach-500">${fmt.format(product.price)}</span>
+                            <div class="w-8 h-8 rounded-full bg-lavender-50 text-lavender-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const exist = cart.find(item => item.product.id === id);
+
+            if (exist) {
+                exist.qty++;
+            } else {
+                cart.push({ product, qty: 1 });
+            }
+            updateCart();
+        }
+
+        function updateQty(id, delta) {
+            const index = cart.findIndex(item => item.product.id === id);
+            if (index > -1) {
+                cart[index].qty += delta;
+                if (cart[index].qty <= 0) {
+                    cart.splice(index, 1);
+                }
+                updateCart();
+            }
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCart();
+        }
+
+        function updateCart() {
+            if (cart.length === 0) {
+                emptyCart.style.display = 'flex';
+                payBtn.disabled = true;
+            } else {
+                emptyCart.style.display = 'none';
+                payBtn.disabled = false;
+            }
+
+            const items = cartList.querySelectorAll('.cart-item');
+            items.forEach(item => item.remove());
+
+            let subtotal = 0;
+            let totalMinutes = 0;
+
+            cart.forEach(item => {
+                subtotal += (item.qty * item.product.price);
+                // Parse minutes roughly for duration estimation
+                const minsNum = parseInt(item.product.duration) || 30;
+                totalMinutes += (item.qty * minsNum);
+
+                const div = document.createElement('div');
+                div.className = "cart-item bg-white p-3 rounded-2xl shadow-sm flex items-center gap-3 border border-gray-100 group";
+                
+                div.innerHTML = `
+                    <img src="${item.product.image}" class="w-12 h-12 rounded-xl object-cover border border-gray-100">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-extrabold text-gray-800 leading-tight">${item.product.name}</h4>
+                        <p class="text-[11px] font-bold text-gray-400 mt-0.5">${fmt.format(item.product.price)}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="text-xs font-extrabold text-peach-500">
+                            ${fmt.format(item.qty * item.product.price)}
+                        </span>
+                        <div class="flex items-center bg-gray-50 rounded-full p-1 border border-gray-100">
+                            <button onclick="updateQty(${item.product.id}, -1)" class="w-6 h-6 rounded-full bg-white text-gray-600 shadow-sm flex items-center justify-center hover:bg-peach-50 hover:text-peach-500 transition-colors">
+                                <i class="fa-solid fa-minus text-[8px]"></i>
+                            </button>
+                            <span class="w-6 text-center text-xs font-extrabold text-gray-800">${item.qty}</span>
+                            <button onclick="updateQty(${item.product.id}, 1)" class="w-6 h-6 rounded-full bg-white text-gray-600 shadow-sm flex items-center justify-center hover:bg-lavender-50 hover:text-lavender-500 transition-colors">
+                                <i class="fa-solid fa-plus text-[8px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                cartList.appendChild(div);
+            });
+
+            document.getElementById('timeText').innerText = totalMinutes + " Menit";
+            document.getElementById('totalText').innerText = fmt.format(subtotal);
+        }
+
+        init();
+    </script>
+</body>
+</html>

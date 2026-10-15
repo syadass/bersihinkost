@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Kelola Pesanan</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden p-4 sm:p-5 gap-5 selection:bg-peach-400 selection:text-white">
+
+    <!-- Floating Pill Sidebar -->
+    <aside class="w-24 bg-gradient-to-b from-lavender-600 to-lavender-800 rounded-[3rem] flex flex-col items-center py-8 shadow-float z-10 text-white">
+        
+        <!-- App Logo -->
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md border border-white/30 shadow-inner">
+            <i class="fa-solid fa-broom text-2xl text-white"></i>
+        </div>
+
+        <!-- Navigation Icons -->
+        <nav class="flex flex-col gap-6 w-full items-center flex-1">
+            <a href="dashboard.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Dashboard Utama">
+                <i class="fa-solid fa-chart-pie text-xl"></i>
+            </a>
+            <a href="orders.html" class="w-14 h-14 bg-white text-lavender-600 rounded-3xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105" title="Kelola Pesanan">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+            </a>
+            <a href="index.html" target="_blank" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Lihat Web Publik">
+                <i class="fa-solid fa-globe text-xl"></i>
+            </a>
+        </nav>
+
+        <!-- Settings -->
+        <div class="flex flex-col gap-4 mt-auto">
+            <button class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Pengaturan">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-2">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Kelola Pesanan Masuk</h1>
+                <p class="text-sm font-bold text-lavender-500">Daftar booking pembersihan kamar kost dari penghuni</p>
+            </div>
+            
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <!-- Search Bar -->
+                <div class="relative w-64 md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-5 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchOrderInput" placeholder="Cari nama atau nomor kamar..." class="w-full pl-12 pr-4 py-3.5 rounded-3xl bg-white border-none shadow-card text-sm font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 transition-all">
+                </div>
+                
+                <!-- Owner Profile -->
+                <div class="flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100">
+                    <div class="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
+                        SY
+                    </div>
+                    <div>
+                        <p class="text-sm font-extrabold text-gray-800 leading-tight">Syada Saleha</p>
+                        <p class="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Filter Tabs -->
+        <div class="flex gap-3 mb-5 overflow-x-auto pb-2 scrollbar-hide" id="statusFilterContainer">
+            <button class="px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105" onclick="filterStatus('All')">
+                <i class="fa-solid fa-layer-group text-xs"></i> Semua Pesanan (<span id="countAll">0</span>)
+            </button>
+            <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterStatus('Menunggu')">
+                <i class="fa-solid fa-clock text-xs text-amber-500"></i> Menunggu Eksekusi (<span id="countMenunggu">0</span>)
+            </button>
+            <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterStatus('Proses')">
+                <i class="fa-solid fa-spinner text-xs text-lavender-500"></i> Sedang Dikerjakan (<span id="countProses">0</span>)
+            </button>
+            <button class="px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap" onclick="filterStatus('Selesai')">
+                <i class="fa-solid fa-circle-check text-xs text-emerald-500"></i> Selesai (<span id="countSelesai">0</span>)
+            </button>
+        </div>
+
+        <!-- Orders Table / List Container -->
+        <div class="flex-1 overflow-y-auto pb-6 pr-2">
+            <div class="bg-white rounded-3xl shadow-card border border-lavender-50 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-100 bg-lavender-50/50 text-gray-500 text-xs font-extrabold uppercase tracking-wider">
+                                <th class="py-4 px-6">ID & Waktu</th>
+                                <th class="py-4 px-6">Penghuni / Kamar</th>
+                                <th class="py-4 px-6">Layanan Dipesan</th>
+                                <th class="py-4 px-6">Total Tarif</th>
+                                <th class="py-4 px-6">Status</th>
+                                <th class="py-4 px-6 text-center">Aksi Pengerjaan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyOrders" class="hidden flex-col items-center justify-center text-center py-16">
+                    <div class="w-20 h-20 rounded-full bg-lavender-50 text-lavender-300 flex items-center justify-center text-3xl mb-3 border-2 border-dashed border-lavender-200">
+                        <i class="fa-solid fa-inbox"></i>
+                    </div>
+                    <p class="text-base font-extrabold text-gray-700">Tidak ada pesanan ditemukan</p>
+                    <p class="text-xs font-medium text-gray-400 mt-1">Pesanan baru dari penghuni kost akan muncul di sini</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Data Simulasi Pesanan Masuk
+        let orders = [
+            { id: 'ORD-001', time: 'Hari ini, 10:30 WIB', name: 'Rian Pratama', room: 'Kamar 05', items: 'Deep Cleaning Total (1x)', total: 75000, status: 'Menunggu' },
+            { id: 'ORD-002', time: 'Hari ini, 08:15 WIB', name: 'Siti Rahma', room: 'Kamar 12', items: 'Kuras & Sikat Kamar Mandi (1x)', total: 40000, status: 'Proses' },
+            { id: 'ORD-003', time: 'Kemarin, 14:00 WIB', name: 'Dimas Anggara', room: 'Kamar 02', items: 'Cuci & Service AC Kost (1x)', total: 85000, status: 'Selesai' },
+            { id: 'ORD-004', time: 'Kemarin, 09:30 WIB', name: 'Jessica Putri', room: 'Kamar 08', items: 'Bersih Ringan & Sapu Pel (2x)', total: 50000, status: 'Selesai' }
+        ];
+
+        let currentStatusFilter = 'All';
+        let searchQuery = '';
+
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        const emptyOrders = document.getElementById('emptyOrders');
+        const searchOrderInput = document.getElementById('searchOrderInput');
+
+        const fmt = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+
+        function initOrders() {
+            renderOrders();
+            updateCounts();
+
+            searchOrderInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderOrders();
+            });
+        }
+
+        function filterStatus(status) {
+            currentStatusFilter = status;
+            renderOrders();
+
+            const buttons = document.getElementById('statusFilterContainer').children;
+            for(let btn of buttons) {
+                if(btn.innerText.includes(status) || (status === 'All' && btn.innerText.includes('Semua'))) {
+                    btn.className = "px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105";
+                } else {
+                    btn.className = "px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap";
+                }
+            }
+        }
+
+        function updateCounts() {
+            document.getElementById('countAll').innerText = orders.length;
+            document.getElementById('countMenunggu').innerText = orders.filter(o => o.status === 'Menunggu').length;
+            document.getElementById('countProses').innerText = orders.filter(o => o.status === 'Proses').length;
+            document.getElementById('countSelesai').innerText = orders.filter(o => o.status === 'Selesai').length;
+        }
+
+        function updateOrderStatus(id, newStatus) {
+            const order = orders.find(o => o.id === id);
+            if(order) {
+                order.status = newStatus;
+                renderOrders();
+                updateCounts();
+            }
+        }
+
+        function deleteOrder(id) {
+            if(confirm('Yakin ingin menghapus riwayat pesanan ini?')) {
+                orders = orders.filter(o => o.id !== id);
+                renderOrders();
+                updateCounts();
+            }
+        }
+
+        function renderOrders() {
+            ordersTableBody.innerHTML = '';
+
+            const filtered = orders.filter(o => {
+                const matchStatus = currentStatusFilter === 'All' || o.status === currentStatusFilter;
+                const matchSearch = o.name.toLowerCase().includes(searchQuery) || o.room.toLowerCase().includes(searchQuery) || o.id.toLowerCase().includes(searchQuery);
+                return matchStatus && matchSearch;
+            });
+
+            if(filtered.length === 0) {
+                emptyOrders.style.display = 'flex';
+                return;
+            } else {
+                emptyOrders.style.display = 'none';
+            }
+
+            filtered.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-lavender-50/30 transition-colors";
+
+                let badgeColor = "bg-amber-100 text-amber-700 border-amber-200";
+                if(order.status === 'Proses') badgeColor = "bg-lavender-100 text-lavender-700 border-lavender-200";
+                if(order.status === 'Selesai') badgeColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6">
+                        <span class="font-extrabold text-gray-800 block">${order.id}</span>
+                        <span class="text-xs font-semibold text-gray-400">${order.time}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="font-extrabold text-gray-800 block">${order.name}</span>
+                        <span class="text-xs font-bold text-peach-500 bg-peach-50 px-2 py-0.5 rounded-md inline-block mt-1">${order.room}</span>
+                    </td>
+                    <td class="py-4 px-6 font-medium text-gray-600">
+                        ${order.items}
+                    </td>
+                    <td class="py-4 px-6 font-extrabold text-gray-800">
+                        ${fmt.format(order.total)}
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="px-3 py-1 rounded-full text-xs font-extrabold border ${badgeColor} inline-block">
+                            ${order.status}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            ${order.status === 'Menunggu' ? `
+                                <button onclick="updateOrderStatus('${order.id}', 'Proses')" class="px-3 py-1.5 rounded-xl bg-lavender-600 text-white text-xs font-bold shadow-sm hover:bg-lavender-700 transition-colors" title="Mulai Kerjakan">
+                                    <i class="fa-solid fa-play mr-1"></i> Mulai
+                                </button>
+                            ` : ''}
+                            ${order.status === 'Proses' ? `
+                                <button onclick="updateOrderStatus('${order.id}', 'Selesai')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-sm hover:bg-emerald-700 transition-colors" title="Tandai Selesai">
+                                    <i class="fa-solid fa-check mr-1"></i> Selesaikan
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteOrder('${order.id}')" class="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors" title="Hapus Pesanan">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                ordersTableBody.appendChild(tr);
+            });
+        }
+
+        initOrders();
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Login Pengelola</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+    </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 selection:bg-peach-400 selection:text-white relative overflow-hidden">
+
+    <!-- Background Decorative Blur Circles -->
+    <div class="absolute -top-20 -left-20 w-72 h-72 bg-lavender-200 rounded-full blur-3xl opacity-50"></div>
+    <div class="absolute -bottom-20 -right-20 w-72 h-72 bg-peach-200 rounded-full blur-3xl opacity-50"></div>
+
+    <!-- Login Card Container -->
+    <main class="w-full max-w-md bg-white rounded-[2.5rem] shadow-float border border-lavender-50 p-8 sm:p-10 relative z-10 flex flex-col items-center">
+        
+        <!-- Logo Header -->
+        <div class="w-16 h-16 bg-gradient-to-tr from-lavender-600 to-lavender-700 rounded-3xl flex items-center justify-center text-white shadow-lg shadow-lavender-200 mb-5">
+            <i class="fa-solid fa-broom text-2xl"></i>
+        </div>
+
+        <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight text-center">KostClean Manager</h1>
+        <p class="text-xs font-bold text-lavender-500 mt-1 mb-8 text-center">Masuk ke panel pengelolaan mandiri</p>
+
+        <!-- Login Form -->
+        <form onsubmit="handleLogin(event)" class="w-full space-y-4">
+            <div>
+                <label class="block text-xs font-extrabold text-gray-600 mb-1.5">Email Pengelola</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                        <i class="fa-solid fa-envelope text-xs"></i>
+                    </span>
+                    <input type="email" id="email" required placeholder="syada@kostclean.com" value="syada@kostclean.com" class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-extrabold text-gray-600 mb-1.5">Kata Sandi</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                    </span>
+                    <input type="password" id="password" required placeholder="••••••••" value="password123" class="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 transition-all">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs font-bold py-1">
+                <label class="flex items-center gap-2 cursor-pointer text-gray-600">
+                    <input type="checkbox" checked class="rounded accent-lavender-600 w-4 h-4"> Ingat Saya
+                </label>
+                <a href="#" onclick="alert('Silakan hubungi administrator sistem.')" class="text-lavender-600 hover:underline">Lupa sandi?</a>
+            </div>
+
+            <button type="submit" class="w-full py-4 rounded-2xl bg-lavender-600 text-white font-extrabold text-sm shadow-lg shadow-lavender-200 hover:bg-lavender-700 hover:shadow-xl transition-all flex justify-center items-center gap-2 mt-2">
+                <i class="fa-solid fa-right-to-bracket"></i> Masuk Dashboard
+            </button>
+        </form>
+
+        <!-- Footer Back to Web -->
+        <div class="mt-8 pt-6 border-t border-gray-100 w-full text-center">
+            <a href="index.html" class="text-xs font-extrabold text-gray-400 hover:text-lavender-600 transition-colors flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali ke Web Publik (Penghuni)
+            </a>
+        </div>
+    </main>
+
+    <script>
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+
+            if(email && pass) {
+                // Simulasi login sukses langsung mengarahkan ke dashboard utama
+                window.location.href = 'dashboard.html';
+            } else {
+                alert('Mohon isi email dan kata sandi!');
+            }
+        }
+    </script>
+</body>
+</html>

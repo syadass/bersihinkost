@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KostClean - Pengaturan Sistem</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        peach: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        },
+                        base: '#F9F8FC'
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'float': '0 20px 40px -15px rgba(124, 58, 237, 0.15)',
+                        'card': '0 10px 30px -10px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F9F8FC;
+            color: #2D3748;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex overflow-hidden p-4 sm:p-5 gap-5 selection:bg-peach-400 selection:text-white">
+
+    <!-- Floating Pill Sidebar -->
+    <aside class="w-24 bg-gradient-to-b from-lavender-600 to-lavender-800 rounded-[3rem] flex flex-col items-center py-8 shadow-float z-10 text-white">
+        
+        <!-- App Logo -->
+        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md border border-white/30 shadow-inner">
+            <i class="fa-solid fa-broom text-2xl text-white"></i>
+        </div>
+
+        <!-- Navigation Icons -->
+        <nav class="flex flex-col gap-6 w-full items-center flex-1">
+            <a href="dashboard.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Dashboard Utama">
+                <i class="fa-solid fa-chart-pie text-xl"></i>
+            </a>
+            <a href="orders.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Kelola Pesanan">
+                <i class="fa-solid fa-clipboard-list text-xl"></i>
+            </a>
+            <a href="services.html" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Kelola Layanan">
+                <i class="fa-solid fa-list-check text-xl"></i>
+            </a>
+            <a href="index.html" target="_blank" class="w-14 h-14 text-lavender-200 hover:bg-white/10 rounded-3xl flex items-center justify-center transition-colors" title="Lihat Web Publik">
+                <i class="fa-solid fa-globe text-xl"></i>
+            </a>
+        </nav>
+
+        <!-- Settings (Active) -->
+        <div class="flex flex-col gap-4 mt-auto">
+            <a href="settings.html" class="w-14 h-14 bg-white text-lavender-600 rounded-3xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105" title="Pengaturan">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main class="flex-1 flex flex-col min-w-0 bg-transparent">
+        
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pt-2">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Pengaturan Sistem</h1>
+                <p class="text-sm font-bold text-lavender-500">Kelola profil usaha, kontak WhatsApp, dan jam operasional</p>
+            </div>
+            
+            <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                <!-- Owner Profile -->
+                <div class="flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100">
+                    <div class="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
+                        SY
+                    </div>
+                    <div>
+                        <p class="text-sm font-extrabold text-gray-800 leading-tight">Syada Saleha</p>
+                        <p class="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Settings Container -->
+        <div class="flex-1 overflow-y-auto pb-6 pr-2">
+            <div class="max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Card 1: Profil Usaha & Kontak -->
+                <div class="bg-white p-6 rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-2xl bg-lavender-50 text-lavender-600 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-extrabold text-gray-800">Profil Usaha & Kontak</h3>
+                                <p class="text-xs font-semibold text-gray-400">Informasi yang tampil di web publik</p>
+                            </div>
+                        </div>
+
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-extrabold text-gray-600 mb-1">Nama Usaha</label>
+                                <input type="text" value="KostClean Solo Service" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-gray-600 mb-1">Nama Pengelola (Solo Operator)</label>
+                                <input type="text" value="Syada Saleha" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-gray-600 mb-1">Nomor WhatsApp (Penerima Pesanan)</label>
+                                <input type="text" value="6281234567890" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="alert('Pengaturan profil berhasil disimpan!')" class="w-full py-3.5 rounded-2xl bg-lavender-600 text-white font-extrabold text-sm shadow-md hover:bg-lavender-700 transition-all">
+                            Simpan Perubahan Profil
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Jam Operasional & Status Layanan -->
+                <div class="bg-white p-6 rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+                            <div class="w-10 h-10 rounded-2xl bg-peach-50 text-peach-600 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-extrabold text-gray-800">Jam Operasional</h3>
+                                <p class="text-xs font-semibold text-gray-400">Atur ketersediaan layanan harian</p>
+                            </div>
+                        </div>
+
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-extrabold text-gray-600 mb-1">Status Pengerjaan Harian</label>
+                                <select class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                                    <option value="open">Buka (Menerima Pesanan)</option>
+                                    <option value="busy">Padat Jadwal (Booking Terbatas)</option>
+                                    <option value="closed">Tutup (Sedang Libur / Istirahat)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="col-span-1">
+                                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Jam Mulai</label>
+                                    <input type="time" value="08:00" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-xs font-extrabold text-gray-600 mb-1">Jam Selesai</label>
+                                    <input type="time" value="17:00" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-gray-600 mb-1">Catatan Khusus untuk Penghuni</label>
+                                <textarea rows="2" class="w-full px-4 py-3 rounded-2xl bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400" placeholder="Contoh: Hari Minggu libur pengerjaan deep cleaning.">Pemesanan untuk hari yang sama harap konfirmasi 2 jam sebelumnya.</textarea>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <button type="button" onclick="alert('Pengaturan operasional berhasil disimpan!')" class="w-full py-3.5 rounded-2xl bg-peach-500 text-white font-extrabold text-sm shadow-md hover:bg-peach-600 transition-all">
+                            Simpan Jam Operasional
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
