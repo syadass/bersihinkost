@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { orderUpdateSchema, accRescheduleSchema, cancelSchema } from '@/lib/validations'
 import { combineDateTime } from '@/lib/date'
+import { attachDisplayNumbers, displayOrderNumber } from '@/lib/order-number'
 
 function fmtDateWIB(iso) {
   if (!iso) return '-'
@@ -49,7 +50,8 @@ export async function GET(req, { params }) {
   if (!order) {
     return Response.json({ message: 'Pesanan tidak ditemukan.' }, { status: 404 })
   }
-  return Response.json({ order })
+  const [enriched] = await attachDisplayNumbers([order], prisma)
+  return Response.json({ order: enriched || order })
 }
 
 export async function PUT(req, { params }) {
@@ -131,7 +133,7 @@ export async function PATCH(req, { params }) {
     if (body.tanggal_fix && body.jam_fix && body.action === 'acc') {
       const data = accRescheduleSchema.parse(body)
       const tanggalFix = combineDateTime(data.tanggal_fix, data.jam_fix)
-      const updated = await prisma.order.update({
+      await prisma.order.update({
         where: { id: Number(params.id) },
         data: {
           tanggal_fix: new Date(tanggalFix),
@@ -139,19 +141,11 @@ export async function PATCH(req, { params }) {
           alasan_batal: null,
         },
       })
-      const lines = [
-        `Halo Kak ${order.customer_name},`,
-        `Pesanan #${order.id} di *${business}* sudah *di-ACC/terkonfirmasi*.`,
-        `Jadwal pengerjaan: ${fmtDateWIB(updated.tanggal_fix)}`,
-        `Alamat: ${order.alamat}`,
-        '',
-        'Terima kasih, kami akan datang sesuai jadwal ya.',
-      ]
+      const code = await displayOrderNumber(order, prisma)
       return Response.json({
         ok: true,
-        message: `Order #${params.id} di-ACC untuk ${data.tanggal_fix} pukul ${data.jam_fix}.`,
-        customer_wa_link: waToCustomer(order.customer_wa, lines),
-        customer_notified: false,
+        message: `Pesanan ${code} di-ACC untuk ${data.tanggal_fix} pukul ${data.jam_fix}.`,
+        customer_notified: true,
       })
     }
 
@@ -166,42 +160,58 @@ export async function PATCH(req, { params }) {
           ...(keterangan ? { catatan_admin: keterangan } : {}),
         },
       })
+      const code = await displayOrderNumber(order, prisma)
       const jadwalSaatIni = fmtDateWIB(order.tanggal_fix || order.tanggal_usulan)
       const lines = [
         `Halo Kak ${order.customer_name},`,
-        `Terkait pesanan #${order.id} di *${business}* (jadwal saat ini: ${jadwalSaatIni}), kami ingin mengajukan perubahan jadwal.`,
+        `Terkait pesanan ${code} di *${business}* (jadwal saat ini: ${jadwalSaatIni}), kami ingin mengajukan perubahan jadwal.`,
         ...(keterangan ? [`Keterangan: ${keterangan}`] : []),
         '',
         'Mohon balas pesan ini dengan usulan tanggal dan jam baru yang Anda inginkan. Terima kasih.',
       ]
       return Response.json({
         ok: true,
-        message: `Permintaan perubahan jadwal untuk order #${params.id} diajukan.`,
+        message: `Permintaan perubahan jadwal untuk pesanan ${code} diajukan.`,
         customer_wa_link: waToCustomer(order.customer_wa, lines),
         customer_notified: false,
       })
     }
 
-    // Batalkan pesanan (fix batal, tanpa direct WA)
-    if (body.alasan_batal !== undefined) {
-      const data = cancelSchema.parse(body)
+    // Batalkan pesanan (fix batal, tanpa direct WA, alasan opsional)
+    if (body.alasan_batal !== undefined || body.action === 'cancel') {
+      const parsed = cancelSchema.safeParse(body || {})
+      const alasan = parsed.success ? (parsed.data.alasan_batal || '').trim() : ''
       await prisma.order.update({
         where: { id: Number(params.id) },
-        data: { status: 'cancelled', alasan_batal: data.alasan_batal },
+        data: { status: 'cancelled', alasan_batal: alasan || null },
       })
+      const code = await displayOrderNumber(order, prisma)
       return Response.json({
         ok: true,
-        message: `Order #${params.id} dibatalkan.`,
-        customer_notified: false,
+        message: `Pesanan ${code} dibatalkan.`,
+        customer_notified: true,
       })
     }
 
-    if (body.status === 'completed') {
+    if (body.status === 'completed' || body.action === 'complete') {
+      if (order.status !== 'confirmed') {
+        return Response.json({ message: 'Pesanan harus berstatus ACC/terkonfirmasi sebelum diselesaikan.' }, { status: 422 })
+      }
+      const proof = typeof body.payment_proof_url === 'string' ? body.payment_proof_url : (typeof body.bukti_pembayaran === 'string' ? body.bukti_pembayaran : '')
+      const payment_status = typeof body.payment_status === 'string' ? body.payment_status : null
+      const payment_method = typeof body.payment_method === 'string' ? body.payment_method : null
+      const methodIsTf = (payment_method || '').toLowerCase() === 'transfer'
       await prisma.order.update({
         where: { id: Number(params.id) },
-        data: { status: 'completed' },
+        data: {
+          status: 'completed',
+          ...(payment_status ? { payment_status } : {}),
+          ...(payment_method ? { payment_method } : {}),
+          ...(proof && methodIsTf ? { payment_proof_url: proof } : {}),
+        },
       })
-      return Response.json({ ok: true, message: `Order #${params.id} selesai, masuk kas.` })
+      const code = await displayOrderNumber(order, prisma)
+      return Response.json({ ok: true, message: `Pesanan ${code} selesai.` })
     }
 
     return Response.json({ message: 'Aksi tidak dikenal.' }, { status: 400 })

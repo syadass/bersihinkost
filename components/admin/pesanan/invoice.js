@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import InvoiceSheet from './_invoice_sheet'
+import LoadingState from '@/components/ui/loading-state'
 
 export default function PesananInvoice({ params }) {
   const id = Number(params.id)
@@ -36,7 +37,7 @@ export default function PesananInvoice({ params }) {
       // @ts-ignore
       await window.html2pdf().set({
         margin: 10,
-        filename: `invoice-#${id}-bersihinkost.pdf`,
+        filename: `invoice-${(order?.order_number || `#${id}`).replace(/[^a-zA-Z0-9-_]/g, '-')}-bersihinkost.pdf`,
         image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -54,16 +55,8 @@ export default function PesananInvoice({ params }) {
   }, [order, sp])
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center p-6 animate-fade-in" style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
-          <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
-          <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
-            <i className="fa-solid fa-broom text-sm animate-pulse" />
-          </div>
-        </div>
-        <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
-      </div>
+    <div style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>
+      <LoadingState size="lg" className="min-h-screen flex items-center justify-center p-6 animate-fade-in" />
     </div>
   )
   if (!order) return <div className="min-h-screen flex items-center justify-center p-6 text-gray-400 font-bold" style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>Pesanan tidak ditemukan.</div>

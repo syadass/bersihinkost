@@ -3,11 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useConfirmModal } from '@/components/layouts/admin'
-
-function initials(name) {
-  const parts = String(name || 'A').trim().split(/\s+/)
-  return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || '')).toUpperCase()
-}
+import { AdminPageTitle, AdminUserBadge } from '@/components/admin/header-parts'
 
 export default function LayananIndex({ userName = 'Administrator' }) {
   return <LayananIndexInner userName={userName} />
@@ -277,10 +273,7 @@ function LayananIndexInner({ userName }) {
 
       <header className="mb-5 sm:mb-6 pt-2">
         <div className="flex flex-col xl:flex-row xl:items-center gap-3">
-          <div className="shrink-0">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">Kelola Layanan & Harga</h1>
-            <p className="text-xs sm:text-sm font-bold text-lavender-500">Tambah, ubah, atau atur daftar jasa pembersihan kost</p>
-          </div>
+          <AdminPageTitle title="Kelola Layanan & Harga" subtitle="Tambah, ubah, atau atur daftar jasa pembersihan kost" />
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 xl:ml-auto min-w-0">
             <div className="flex flex-col min-[520px]:flex-row min-[520px]:items-center gap-2 min-w-0">
@@ -303,15 +296,7 @@ function LayananIndexInner({ userName }) {
               </div>
             </div>
 
-            <div className="hidden sm:flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100 shrink-0 xl:self-auto">
-              <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-                {initials(displayName)}
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-gray-800 leading-tight">{displayName}</p>
-                <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
-              </div>
-            </div>
+            <AdminUserBadge name={displayName} className="xl:self-auto" />
           </div>
         </div>
       </header>
@@ -517,7 +502,7 @@ function LayananIndexInner({ userName }) {
             </div>
 
             <div className="mt-6 pt-4 border-t border-gray-100 text-right">
-              <button type="button" onClick={closeCategoryModal} className="px-6 py-3 rounded-2xl bg-lavender-600 text-white font-extrabold text-xs shadow-md hover:bg-lavender-700 transition-all">Selesai</button>
+              <button type="button" onClick={closeCategoryModal} className="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs shadow-md hover:bg-emerald-700 transition-all">Selesai</button>
             </div>
           </div>
         </div>

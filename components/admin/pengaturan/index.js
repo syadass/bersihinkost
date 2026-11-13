@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useConfirmModal } from '@/components/layouts/admin'
-
-function initials(name) {
-  const parts = String(name || 'A').trim().split(/\s+/)
-  return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || '')).toUpperCase()
-}
+import { AdminPageTitle, AdminUserBadge } from '@/components/admin/header-parts'
 
 export default function PengaturanIndex() {
   return <PengaturanIndexInner />
@@ -169,20 +165,8 @@ function PengaturanIndexInner() {
       {msg.err ? <div className="max-w-4xl w-full mx-auto mb-4 bg-red-50 border border-red-200 text-red-600 px-5 py-3 rounded-2xl text-sm font-bold">{msg.err}</div> : null}
 
       <header className="max-w-4xl w-full mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6 pt-2">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">Pengaturan Sistem</h1>
-          <p className="text-xs sm:text-sm font-bold text-lavender-500">Kelola profil usaha, kontak WhatsApp, dan jam operasional</p>
-        </div>
-
-        <div className="flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100 self-start sm:self-auto">
-          <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-            {initials(setting.operator_name || user.name)}
-          </div>
-          <div>
-            <p className="text-sm font-extrabold text-gray-800 leading-tight">{setting.operator_name || user.name}</p>
-            <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
-          </div>
-        </div>
+        <AdminPageTitle title="Pengaturan Sistem" subtitle="Kelola profil usaha, kontak WhatsApp, dan jam operasional" />
+        <AdminUserBadge name={setting.operator_name || user.name} className="self-start sm:self-auto" />
       </header>
 
       <div className="flex-1 overflow-y-auto pb-32 sm:pb-36 lg:pb-6 sm:pr-2 min-h-0">

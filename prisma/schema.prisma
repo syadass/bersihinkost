@@ -55,20 +55,23 @@ model Setting {
 }
 
 model Order {
-  id              Int       @id @default(autoincrement())
-  customer_name   String    @db.VarChar(100)
-  customer_wa     String    @default("") @db.VarChar(20)
-  alamat          String    @db.Text
-  tanggal_usulan  DateTime
-  tanggal_fix     DateTime?
-  total_harga     Int       @default(0)
-  estimasi_menit  Int       @default(0)
-  status          String    @default("pending") @db.VarChar(20)
-  alasan_batal    String?   @db.Text
-  catatan_admin   String?   @db.Text
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  items           OrderItem[]
+  id                Int       @id @default(autoincrement())
+  customer_name     String    @db.VarChar(100)
+  customer_wa       String    @default("") @db.VarChar(20)
+  alamat            String    @db.Text
+  tanggal_usulan    DateTime
+  tanggal_fix       DateTime?
+  total_harga       Int       @default(0)
+  estimasi_menit    Int       @default(0)
+  status            String    @default("pending") @db.VarChar(20)
+  alasan_batal      String?   @db.Text
+  catatan_admin     String?   @db.Text
+  payment_proof_url String?   @db.Text
+  payment_status    String?   @db.VarChar(20)
+  payment_method    String?   @db.VarChar(30)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  items             OrderItem[]
 }
 
 model OrderItem {

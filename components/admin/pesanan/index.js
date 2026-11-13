@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useConfirmModal } from '@/components/layouts/admin'
+import { AdminPageTitle, AdminUserBadge } from '@/components/admin/header-parts'
 
 const tabsDef = {
   all: { icon: 'fa-layer-group', color: '', label: 'Semua' },
@@ -14,12 +15,16 @@ const tabsDef = {
 }
 const miniBadge = {
   pending: 'bg-amber-100 text-amber-700',
-  rescheduled: 'bg-blue-100 text-blue-700',
+  rescheduled: 'bg-amber-100 text-amber-700',
   confirmed: 'bg-lavender-100 text-lavender-700',
   completed: 'bg-emerald-100 text-emerald-700',
   cancelled: 'bg-red-100 text-red-500',
 }
-const miniLabel = { pending: 'Menunggu ACC', rescheduled: 'Pindah Tanggal', confirmed: 'Terjadwal', completed: 'Selesai', cancelled: 'Batal' }
+const miniLabel = { pending: 'Menunggu ACC', rescheduled: 'Menunggu ACC', confirmed: 'ACC', completed: 'Selesai', cancelled: 'Batal' }
+
+function orderNo(o) {
+  return o?.order_number || (o?.id ? `#${o.id}` : '-')
+}
 const activeCls = 'px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105'
 const idleCls = 'px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap'
 
@@ -71,6 +76,10 @@ function PesananIndexInner({ userName }) {
   const menuRef = useRef(null)
   const reqSeqRef = useRef(0)
   const hasLoadedRef = useRef(false)
+  const [completeTarget, setCompleteTarget] = useState(null)
+  const [paymentStatus, setPaymentStatus] = useState('lunas')
+  const [paymentMethod, setPaymentMethod] = useState('tunai')
+  const [proofPreview, setProofPreview] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -163,6 +172,12 @@ function PesananIndexInner({ userName }) {
     return () => { document.removeEventListener('click', closeMenu); document.removeEventListener('keydown', onKey); document.removeEventListener('scroll', closeMenu, true) }
   }, [])
 
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') setCompleteTarget(null) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   useLayoutEffect(() => {
     if (!openMenuId || !menuRef.current || !menuAnchor) return
     const menu = menuRef.current
@@ -197,6 +212,35 @@ function PesananIndexInner({ userName }) {
     if (!r.ok) { alert(d.message || 'Gagal memproses.'); return }
     if (!d.customer_notified && d.customer_wa_link) window.open(d.customer_wa_link, '_blank')
     await load()
+  }
+
+  function openCompleteModal(order) {
+    setCompleteTarget(order)
+    setPaymentStatus('lunas')
+    setPaymentMethod('tunai')
+    setProofPreview('')
+  }
+
+  function onProofChange(e) {
+    const f = e.target.files?.[0]
+    if (!f) { setProofPreview(''); return }
+    const reader = new FileReader()
+    reader.onload = () => setProofPreview(String(reader.result || ''))
+    reader.readAsDataURL(f)
+  }
+
+  async function submitComplete() {
+    if (!completeTarget) return
+    const id = completeTarget.id
+    const isTf = paymentMethod === 'transfer'
+    setCompleteTarget(null)
+    await doPatch(id, {
+      action: 'complete',
+      payment_status: paymentStatus,
+      payment_method: paymentMethod,
+      ...(isTf && proofPreview ? { payment_proof_url: proofPreview } : {}),
+    })
+    setProofPreview('')
   }
   async function doDelete(id) {
     const r = await fetch(`/api/orders/${id}`, { method: 'DELETE' })
@@ -255,10 +299,7 @@ function PesananIndexInner({ userName }) {
       {/* Header */}
       <header className="mb-5 sm:mb-6 pt-2">
         <div className="flex flex-col xl:flex-row xl:items-center gap-3">
-          <div className="shrink-0">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">Kelola Pesanan Masuk</h1>
-            <p className="text-xs sm:text-sm font-bold text-lavender-500">Daftar booking pembersihan kamar kost dari pemesan</p>
-          </div>
+          <AdminPageTitle title="Kelola Pesanan Masuk" subtitle="Daftar booking pembersihan kamar kost dari pemesan" />
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 xl:ml-auto min-w-0">
             <div className="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2 sm:gap-3 min-w-0">
@@ -283,15 +324,7 @@ function PesananIndexInner({ userName }) {
               </div>
             </div>
 
-            <div className="hidden sm:flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100 shrink-0 xl:self-auto">
-              <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-                {initials}
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-gray-800 leading-tight">{displayName}</p>
-                <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
-              </div>
-            </div>
+            <AdminUserBadge name={displayName} className="xl:self-auto" />
           </div>
         </div>
       </header>
@@ -348,22 +381,67 @@ function PesananIndexInner({ userName }) {
             ))
           ) : (data.orders || []).length ? (
             <div className={`grid gap-3 transition-opacity duration-300 ${loading ? 'opacity-60' : 'opacity-100 animate-fade-in'}`}>
-              {(data.orders || []).map((order) => (
-                <Link key={order.id} href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="block bg-white rounded-2xl shadow-card border border-lavender-50 p-4 active:scale-[0.99] transition-all duration-200 hover:shadow-md">
-                  <div className="flex items-start justify-between gap-2 mb-1.5">
-                    <div className="min-w-0">
-                      <p className="text-sm font-extrabold text-gray-800 truncate">#{order.id} • {order.customer_name}</p>
-                      <p className="text-[11px] font-semibold text-gray-400 truncate">{order.alamat}</p>
+              {(data.orders || []).map((order) => {
+                const jadwal = order.tanggal_fix || order.tanggal_usulan
+                const canManage = !['completed', 'cancelled'].includes(order.status)
+                return (
+                  <div key={order.id} className="bg-white rounded-2xl shadow-card border border-lavender-50 p-4 transition-all duration-200 hover:shadow-md">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="min-w-0 flex-1">
+                        <p className="text-sm font-extrabold text-gray-800 truncate">{orderNo(order)} • {order.customer_name}</p>
+                        <p className="text-[11px] font-semibold text-gray-400 truncate">{order.alamat}</p>
+                      </Link>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold whitespace-nowrap shrink-0 ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
                     </div>
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold whitespace-nowrap shrink-0 ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
+                    <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="block">
+                      <p className="text-[11px] font-semibold text-gray-500 truncate mb-2">{(order.items || []).map(i=>`${i.service_name} (${i.qty}x)`).join(', ')}</p>
+                      <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-100">
+                        <span className="text-[11px] font-bold text-gray-400"><i className="fa-regular fa-clock mr-1"></i>{fmtDateShort(jadwal)}, {fmtTime(jadwal)}</span>
+                        <span className="text-sm font-extrabold text-gray-800">Rp{Number(order.total_harga||0).toLocaleString('id-ID')}</span>
+                      </div>
+                    </Link>
+
+                    {canManage && (
+                      <div className="mt-3 pt-3 border-t border-dashed border-gray-100 flex items-center gap-2">
+                        {['pending', 'rescheduled'].includes(order.status) ? (
+                          <form onSubmit={(e)=>{ e.preventDefault(); const fd=new FormData(e.currentTarget); confirm.open({ title:'ACC Pesanan?', message:`Pesanan ${orderNo(order)} akan di-ACC.`, confirmText:'Ya, ACC', tone:'lavender', icon:'fa-check', onConfirm:()=>doPatch(order.id,{ action:'acc', tanggal_fix:fd.get('tanggal_fix'), jam_fix:fd.get('jam_fix') }) }) }} className="flex-1">
+                            <input type="hidden" name="tanggal_fix" value={toDateValue(jadwal)} />
+                            <input type="hidden" name="jam_fix" value={toTimeValue(jadwal)} />
+                            <button className="w-full py-2 rounded-xl bg-lavender-600 text-white text-xs font-extrabold hover:bg-lavender-700 flex items-center justify-center gap-1.5">
+                              <i className="fa-solid fa-check"></i> ACC
+                            </button>
+                          </form>
+                        ) : order.status === 'confirmed' ? (
+                          <button onClick={()=>openCompleteModal(order)} className="flex-1 py-2 rounded-xl bg-emerald-500 text-white text-xs font-extrabold hover:bg-emerald-600 flex items-center justify-center gap-1.5">
+                            <i className="fa-solid fa-check-double"></i> Selesaikan
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={(e)=>{
+                            e.preventDefault()
+                            e.stopPropagation()
+                            e.nativeEvent?.stopImmediatePropagation?.()
+                            if (openMenuId === order.id) { setOpenMenuId(null); setMenuAnchor(null); return }
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            const menuW = 224
+                            let left = rect.right - menuW
+                            left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8))
+                            const top = Math.min(rect.bottom + 6, window.innerHeight - 16)
+                            setMenuPos({ top, left })
+                            setMenuAnchor({ top: rect.top, bottom: rect.bottom, right: rect.right })
+                            setOpenMenuId(order.id)
+                          }}
+                          title="Aksi lain"
+                          className="w-10 h-9 shrink-0 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-all"
+                        >
+                          <i className="fa-solid fa-ellipsis-vertical text-xs"></i>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[11px] font-semibold text-gray-500 truncate mb-2">{(order.items || []).map(i=>`${i.service_name} (${i.qty}x)`).join(', ')}</p>
-                  <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-100">
-                    <span className="text-[11px] font-bold text-gray-400"><i className="fa-regular fa-clock mr-1"></i>{fmtDateShort(order.tanggal_fix || order.tanggal_usulan)}, {fmtTime(order.tanggal_fix || order.tanggal_usulan)}</span>
-                    <span className="text-sm font-extrabold text-gray-800">Rp{Number(order.total_harga||0).toLocaleString('id-ID')}</span>
-                  </div>
-                </Link>
-              ))}
+                )
+              })}
             </div>
           ) : !loading ? (
             <div className="flex flex-col items-center justify-center text-center py-14 bg-white rounded-2xl shadow-card border border-lavender-50 animate-fade-in">
@@ -410,7 +488,7 @@ function PesananIndexInner({ userName }) {
                   return (
                     <tr key={order.id} className="hover:bg-lavender-50/30 transition-colors duration-200">
                       <td className="py-4 px-6">
-                        <span className="font-extrabold text-gray-800 block whitespace-nowrap">#{order.id}</span>
+                        <span className="font-extrabold text-gray-800 block whitespace-nowrap">{orderNo(order)}</span>
                       </td>
                       <td className="py-4 px-6 max-w-[220px]">
                         <span className="font-extrabold text-gray-800 block">{order.customer_name}</span>
@@ -432,19 +510,19 @@ function PesananIndexInner({ userName }) {
                       <td className="py-4 px-6">
                         <div className="flex items-center justify-center gap-1.5">
                           {['pending','rescheduled'].includes(order.status) ? (
-                            <form onSubmit={(e)=>{ e.preventDefault(); const fd=new FormData(e.currentTarget); confirm.open({ title:'ACC Pesanan?', message:`Pesanan #${order.id} akan di-ACC.`, confirmText:'Ya, ACC', tone:'emerald', icon:'fa-check', onConfirm:()=>doPatch(order.id,{ action:'acc', tanggal_fix:fd.get('tanggal_fix'), jam_fix:fd.get('jam_fix') }) }) }} title={`ACC (fix: ${fmtDateShort(jadwal)}, ${fmtTime(jadwal)})`}>
+                            <form onSubmit={(e)=>{ e.preventDefault(); const fd=new FormData(e.currentTarget); confirm.open({ title:'ACC Pesanan?', message:`Pesanan ${orderNo(order)} akan di-ACC.`, confirmText:'Ya, ACC', tone:'lavender', icon:'fa-check', onConfirm:()=>doPatch(order.id,{ action:'acc', tanggal_fix:fd.get('tanggal_fix'), jam_fix:fd.get('jam_fix') }) }) }} title={`ACC (fix: ${fmtDateShort(jadwal)}, ${fmtTime(jadwal)})`}>
                               <input type="hidden" name="tanggal_fix" value={toDateValue(jadwal)} />
                               <input type="hidden" name="jam_fix" value={toTimeValue(jadwal)} />
-                              <button className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all duration-200 shadow-sm" title="ACC Pesanan">
+                              <button className="w-8 h-8 rounded-xl bg-lavender-600 text-white flex items-center justify-center hover:bg-lavender-700 transition-all duration-200 shadow-sm" title="ACC Pesanan">
                                 <i className="fa-solid fa-check text-xs"></i>
                               </button>
                             </form>
                           ) : order.status === 'confirmed' ? (
-                            <button onClick={()=>confirm.open({ title:'Tandai Selesai?', message:`Order #${order.id} akan ditandai selesai dan masuk kas.`, confirmText:'Ya, Selesaikan', tone:'emerald', icon:'fa-check-double', onConfirm:()=>doPatch(order.id,{ status:'completed' }) })} className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all duration-200 shadow-sm" title="Selesaikan Pesanan">
+                            <button onClick={()=>openCompleteModal(order)} className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all duration-200 shadow-sm" title="Selesaikan Pesanan">
                               <i className="fa-solid fa-check-double text-xs"></i>
                             </button>
                           ) : (
-                            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} title="Detail" className="w-8 h-8 rounded-xl bg-lavender-600 text-white flex items-center justify-center hover:bg-lavender-700 transition-all duration-200 shadow-sm">
+                            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} title="Detail" className="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-all duration-200 shadow-sm">
                               <i className="fa-solid fa-eye text-xs"></i>
                             </Link>
                           )}
@@ -513,27 +591,37 @@ function PesananIndexInner({ userName }) {
       {openMenuId && (() => {
         const order = (data.orders || []).find(o => o.id === openMenuId)
         if (!order) return null
+        const canManage = !['completed', 'cancelled'].includes(order.status)
+        const isConfirmed = order.status === 'confirmed'
         return (
           <div ref={menuRef} className="fixed w-56 bg-white rounded-2xl shadow-float border border-lavender-100 p-2 z-[60] max-h-[calc(100vh-16px)] overflow-auto" style={{ top: menuPos.top, left: menuPos.left }} onClick={(e)=>e.stopPropagation()}>
-            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} onClick={()=>setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-lavender-50 hover:text-lavender-600">
+            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} onClick={()=>setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-800">
               <i className="fa-solid fa-eye w-4 text-center"></i> Detail Pesanan
             </Link>
-            {!['completed','cancelled'].includes(order.status) && (
-              <>
-                <Link href={`/admin/pesanan/${order.id}/edit?from=${encodeURIComponent(fromUrl)}`} onClick={()=>setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-lavender-50 hover:text-lavender-600">
-                  <i className="fa-solid fa-pen-to-square w-4 text-center"></i> Ubah Pesanan
-                </Link>
-                <form onSubmit={(e)=>{ e.preventDefault(); const alasan=e.currentTarget.alasan_batal.value; if(!alasan) return; setOpenMenuId(null); confirm.open({ title:'Batalkan Pesanan?', message:`Order #${order.id} akan dibatalkan (fix batal) tanpa mengirim WhatsApp.`, confirmText:'Ya, Batalkan', tone:'red', icon:'fa-ban', onConfirm:()=>doPatch(order.id,{ alasan_batal: alasan }) }) }} className="mt-1 pt-2 border-t border-dashed border-gray-200">
-                  <input type="text" name="alasan_batal" required placeholder="Alasan batal..." className="w-full text-[11px] font-bold bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-red-300 mb-1.5" />
-                  <button className="w-full py-2 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 flex items-center justify-center gap-1.5">
-                    <i className="fa-solid fa-ban"></i> Batalkan Pesanan
-                  </button>
-                </form>
-              </>
+
+            {canManage && !isConfirmed && (
+              <Link href={`/admin/pesanan/${order.id}/edit?from=${encodeURIComponent(fromUrl)}`} onClick={()=>setOpenMenuId(null)} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-lavender-50 hover:text-lavender-600">
+                <i className="fa-solid fa-pen-to-square w-4 text-center"></i> Ubah Pesanan
+              </Link>
             )}
+
+            {isConfirmed && (
+              <button onClick={()=>{ setOpenMenuId(null); openCompleteModal(order) }} className="w-full mt-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50">
+                <i className="fa-solid fa-check-double w-4 text-center"></i> Selesaikan Pesanan
+              </button>
+            )}
+
+            {canManage && (
+              <div className="mt-1 pt-2 border-t border-dashed border-gray-200">
+                <button onClick={()=>{ setOpenMenuId(null); confirm.open({ title:'Batalkan Pesanan?', message:`Pesanan ${orderNo(order)} akan dibatalkan.`, confirmText:'Ya, Batalkan', tone:'red', icon:'fa-ban', onConfirm:()=>doPatch(order.id,{ action:'cancel', alasan_batal:'' }) }) }} className="w-full py-2 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 flex items-center justify-center gap-1.5">
+                  <i className="fa-solid fa-ban"></i> Batalkan Pesanan
+                </button>
+              </div>
+            )}
+
             {['cancelled','completed'].includes(order.status) && (
               <div className="mt-1 pt-2 border-t border-dashed border-gray-200">
-                <button onClick={()=>{ setOpenMenuId(null); confirm.open({ title:'Hapus Pesanan?', message:`Riwayat pesanan #${order.id} akan dihapus permanen.`, confirmText:'Ya, Hapus', tone:'red', icon:'fa-trash-can', onConfirm:()=>doDelete(order.id) }) }} className="w-full py-2 rounded-xl bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 flex items-center justify-center gap-1.5">
+                <button onClick={()=>{ setOpenMenuId(null); confirm.open({ title:'Hapus Pesanan?', message:`Riwayat pesanan ${orderNo(order)} akan dihapus permanen.`, confirmText:'Ya, Hapus', tone:'red', icon:'fa-trash-can', onConfirm:()=>doDelete(order.id) }) }} className="w-full py-2 rounded-xl bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 flex items-center justify-center gap-1.5">
                   <i className="fa-solid fa-trash-can"></i> Hapus Pesanan
                 </button>
               </div>
@@ -542,6 +630,62 @@ function PesananIndexInner({ userName }) {
         )
       })()}
 
+      {/* Modal Selesaikan Pesanan */}
+      {completeTarget && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4" onClick={(e)=>{ if(e.target===e.currentTarget) setCompleteTarget(null) }}>
+          <div className="bg-white rounded-[1.5rem] shadow-float w-full max-w-md border border-lavender-50 p-5" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-lg font-extrabold text-gray-800">Selesaikan Pesanan</h3>
+                <p className="text-xs font-semibold text-gray-400">{orderNo(completeTarget)} • atur status & metode pembayaran</p>
+              </div>
+              <button onClick={()=>setCompleteTarget(null)} className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200"><i className="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-600 mb-1">Status Pembayaran</label>
+                  <select value={paymentStatus} onChange={(e)=>setPaymentStatus(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                    <option value="lunas">Lunas</option>
+                    <option value="belum_lunas">Belum Lunas</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-600 mb-1">Metode Pembayaran</label>
+                  <select value={paymentMethod} onChange={(e)=>{ const v=e.target.value; setPaymentMethod(v); if(v!=='transfer') setProofPreview('') }} className="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                    <option value="tunai">Tunai</option>
+                    <option value="transfer">Transfer (TF)</option>
+                    <option value="qris">QRIS</option>
+                    <option value="lainnya">Lainnya</option>
+                  </select>
+                </div>
+              </div>
+
+              {paymentMethod === 'transfer' ? (
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-600 mb-1">Bukti Pembayaran (TF)</label>
+                  <input type="file" accept="image/*" onChange={onProofChange} className="w-full text-sm font-semibold text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-lavender-50 file:text-lavender-700 file:font-extrabold" />
+                  {proofPreview ? (
+                    <div className="mt-2 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 p-2">
+                      <img src={proofPreview} alt="Preview bukti pembayaran" className="w-full max-h-56 object-contain rounded-xl" />
+                    </div>
+                  ) : (
+                    <p className="text-xs font-semibold text-gray-400 mt-1">Unggah bukti transfer (opsional).</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs font-semibold text-gray-400">Bukti pembayaran hanya untuk metode Transfer (TF).</p>
+              )}
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onClick={()=>setCompleteTarget(null)} className="py-3 rounded-2xl bg-gray-100 text-gray-600 font-extrabold text-sm hover:bg-gray-200">Batal</button>
+                <button type="button" onClick={submitComplete} className="py-3 rounded-2xl bg-emerald-600 text-white font-extrabold text-sm hover:bg-emerald-700">Selesaikan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Buat Jadwal Manual */}
       {manualOpen && (
         <div id="manualModal" className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto" onClick={(e)=>{ if(e.target.id==='manualModal') setManualOpen(false) }}>
@@ -549,7 +693,7 @@ function PesananIndexInner({ userName }) {
             <div className="flex justify-between items-center gap-3 p-5 border-b border-gray-100 shrink-0">
               <div>
                 <h3 className="text-lg font-extrabold text-gray-800">Buat Jadwal Manual</h3>
-                <p className="text-xs font-semibold text-gray-400">Order walk-in / telepon — langsung tercatat <span className="text-emerald-500 font-extrabold">Confirmed</span></p>
+                <p className="text-xs font-semibold text-gray-400">Order walk-in / telepon — langsung tercatat <span className="text-lavender-600 font-extrabold">ACC</span></p>
               </div>
               <button type="button" onClick={()=>setManualOpen(false)} className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 shrink-0">
                 <i className="fa-solid fa-xmark text-sm"></i>

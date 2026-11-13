@@ -1,6 +1,7 @@
 import AdminLayout from '@/components/layouts/admin'
 import Dashboard, { DashboardRightPanel } from '@/components/admin/dashboard'
 import prisma from '@/lib/prisma'
+import { attachDisplayNumbers } from '@/lib/order-number'
 
 export const dynamic = 'force-dynamic'
 
@@ -197,7 +198,7 @@ export default async function AdminDashboardPage({ searchParams }) {
   const pieColors = pieEntries.map((p) => p.color)
   const pieTotal = pieQtys.reduce((a, b) => a + b, 0)
 
-  const pendingOrders = pendingOrdersRaw.map((o) => ({
+  const pendingOrdersSerialized = pendingOrdersRaw.map((o) => ({
     ...o,
     created_at: o.created_at?.toISOString?.() || null,
     updated_at: o.updated_at?.toISOString?.() || null,
@@ -205,6 +206,7 @@ export default async function AdminDashboardPage({ searchParams }) {
     tanggal_fix: o.tanggal_fix?.toISOString?.() || null,
     items: (o.items || []).map((it) => ({ ...it, created_at: it.created_at?.toISOString?.() || null, updated_at: it.updated_at?.toISOString?.() || null })),
   }))
+  const pendingOrders = await attachDisplayNumbers(pendingOrdersSerialized, prisma)
 
   const props = {
     user: { name: safeSetting.operator_name || 'Administrator' },

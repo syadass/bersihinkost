@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import LoadingState from '@/components/ui/loading-state'
 // Admin layout disediakan oleh app/admin/layout.js
 
 function toDateValue(iso) {
@@ -83,17 +84,7 @@ export default function PesananEdit({ params }) {
   }
 
   if (loading) return (
-    <div className="h-full min-h-[60vh] flex items-center justify-center p-6 animate-fade-in">
-      <div className="flex flex-col items-center gap-3">
-        <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
-          <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
-          <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
-            <i className="fa-solid fa-broom text-sm animate-pulse" />
-          </div>
-        </div>
-        <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
-      </div>
-    </div>
+    <LoadingState size="lg" className="h-full min-h-[60vh] flex items-center justify-center p-6 animate-fade-in" />
   )
   if (!order) return <div className="h-full overflow-y-auto pr-1 pt-2 pb-32 sm:pb-36 lg:pb-6 max-w-3xl text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import LoadingState from '@/components/ui/loading-state'
 import Link from 'next/link'
 
 export default function PublicIndex() {
@@ -212,15 +213,7 @@ export default function PublicIndex() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 pb-6">
             {loading ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-16 gap-3 animate-fade-in">
-                <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
-                  <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
-                  <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
-                    <i className="fa-solid fa-broom text-sm animate-pulse" />
-                  </div>
-                </div>
-                <p className="text-sm font-extrabold text-lavender-500">Memuat layanan...</p>
-              </div>
+              <LoadingState size="lg" text="Memuat layanan..." className="col-span-full flex flex-col items-center justify-center py-16 animate-fade-in" />
             ) : filteredServices.length === 0 ? (
               <div className="col-span-full text-center py-10 text-gray-400 font-bold">Layanan tidak tersedia.</div>
             ) : (

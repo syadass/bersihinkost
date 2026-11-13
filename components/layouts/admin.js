@@ -10,6 +10,7 @@ const menu = [
   { href: '/admin', label: 'Dashboard Utama', icon: 'fa-chart-pie', match: (p) => p === '/admin' },
   { href: '/admin/pesanan', label: 'Jadwal Hari Ini', icon: 'fa-calendar-check', match: (p) => p.startsWith('/admin/pesanan') },
   { href: '/admin/layanan', label: 'Kelola Layanan & Harga', icon: 'fa-list-check', match: (p) => p.startsWith('/admin/layanan') },
+  { href: '/admin/laporan', label: 'Laporan', icon: 'fa-file-invoice-dollar', match: (p) => p.startsWith('/admin/laporan') },
 ]
 
 const ConfirmModalContext = createContext(null)
@@ -187,7 +188,7 @@ function AdminShell({ children, rightPanel }) {
               <p className="text-sm font-extrabold text-gray-800">Pesanan baru masuk</p>
               <p className="text-xs font-semibold text-gray-500 mt-0.5">{notif.count} pesanan menunggu ACC. Silakan cek dan konfirmasi.</p>
               <div className="flex gap-2 mt-3">
-                <Link href="/admin/pesanan?tab=menunggu-acc" onClick={() => setNotif(null)} className="px-3 py-1.5 rounded-xl bg-lavender-600 text-white text-xs font-extrabold">Lihat Pesanan</Link>
+                <Link href="/admin/pesanan?tab=menunggu-acc" onClick={() => setNotif(null)} className="px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-extrabold hover:bg-amber-600">Lihat Pesanan</Link>
                 <button onClick={() => setNotif(null)} className="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-extrabold">Tutup</button>
               </div>
             </div>

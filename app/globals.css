@@ -97,6 +97,9 @@
       print-color-adjust: exact;
       -webkit-print-color-adjust: exact;
     }
+    aside {
+      display: none !important;
+    }
     .no-print {
       display: none !important;
     }
@@ -107,13 +110,26 @@
       max-width: 100% !important;
       margin: 0 !important;
     }
+    .invoice-sheet {
+      font-size: 12px !important;
+    }
+    .invoice-sheet .invoice-content {
+      padding: 18px 24px !important;
+    }
+    .invoice-sheet .inv-mt-8 { margin-top: 14px !important; }
+    .invoice-sheet .inv-mt-6 { margin-top: 10px !important; }
+    .invoice-sheet .inv-mt-10 { margin-top: 14px !important; }
+    .invoice-sheet .inv-gap-8 { gap: 18px !important; }
+    .invoice-sheet table th,
+    .invoice-sheet table td { padding-top: 6px !important; padding-bottom: 6px !important; }
+    .invoice-sheet .avoid-break { break-inside: avoid; page-break-inside: avoid; }
     @page {
-      margin: 14mm;
+      margin: 10mm;
     }
     .laporan-sheet @page {
       margin: 12mm;
     }
-    body.printing > aside, body.printing > main {
+    body.printing > *:not(#printRoot):not(script):not(style) {
       display: none !important;
     }
     body.printing #printRoot {

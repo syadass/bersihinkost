@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useConfirmModal } from '@/components/layouts/admin'
+import { AdminPageTitle, AdminUserBadge } from '@/components/admin/header-parts'
 
 function fmtRupiah(n) {
   return 'Rp' + Number(n || 0).toLocaleString('id-ID')
@@ -133,17 +134,17 @@ export default function Dashboard({
   })()
 
   const chip = {
-    pending: 'bg-amber-100 text-amber-700',
-    confirmed: 'bg-emerald-100 text-emerald-600',
-    rescheduled: 'bg-blue-100 text-blue-600',
-    completed: 'bg-lavender-100 text-lavender-600',
+    pending: 'bg-lavender-100 text-lavender-700',
+    confirmed: 'bg-lavender-100 text-lavender-700',
+    rescheduled: 'bg-lavender-100 text-lavender-700',
+    completed: 'bg-emerald-100 text-emerald-700',
     cancelled: 'bg-red-100 text-red-400 line-through'
   }
   const dotc = {
-    pending: 'bg-amber-400',
-    confirmed: 'bg-emerald-400',
-    rescheduled: 'bg-blue-400',
-    completed: 'bg-lavender-400',
+    pending: 'bg-lavender-400',
+    confirmed: 'bg-lavender-400',
+    rescheduled: 'bg-lavender-400',
+    completed: 'bg-emerald-400',
     cancelled: 'bg-red-400'
   }
 
@@ -153,10 +154,7 @@ export default function Dashboard({
     <>
       {/* Header & Solo Owner Profile */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 pt-2 shrink-0 gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">Bersihinkost Dashboard</h1>
-          <p className="text-sm font-bold text-lavender-500">{fmtDateLongWIB()}</p>
-        </div>
+        <AdminPageTitle title="Bersihinkost Dashboard" subtitle={fmtDateLongWIB()} subtitleClassName="text-sm" />
 
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="relative flex-1 sm:flex-none sm:w-64 md:w-72">
@@ -166,15 +164,7 @@ export default function Dashboard({
             <input type="text" id="searchInput" onKeyDown={handleSearchKey} placeholder="Cari nama atau alamat..." className="w-full pl-12 pr-4 py-3.5 rounded-3xl bg-white border-none shadow-card text-sm font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lavender-400 transition-all" />
           </div>
 
-          <div className="hidden sm:flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card cursor-pointer hover:bg-lavender-50 transition-colors border border-lavender-100 shrink-0">
-            <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-              {initials}
-            </div>
-            <div>
-              <p className="text-sm font-extrabold text-gray-800 leading-tight">{user?.name || 'Administrator'}</p>
-              <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
-            </div>
-          </div>
+          <AdminUserBadge name={user?.name || 'Administrator'} className="cursor-pointer hover:bg-lavender-50 transition-colors" />
         </div>
       </header>
 
@@ -200,11 +190,11 @@ export default function Dashboard({
           </div>
           <a href="/admin/pesanan?tab=menunggu-acc" className="bg-white rounded-3xl shadow-card p-4 sm:p-5 border border-amber-100 hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0"><i className="fa-solid fa-clock text-sm"></i></span>
+              <span className="w-8 h-8 rounded-xl bg-lavender-100 text-lavender-600 flex items-center justify-center shrink-0"><i className="fa-solid fa-clock text-sm"></i></span>
               <h3 className="text-[11px] sm:text-xs font-bold text-gray-500 leading-tight">Menunggu Persetujuan</h3>
             </div>
             <p className="text-lg sm:text-2xl font-extrabold text-gray-800">{pendingCount} <span className="text-xs font-bold text-gray-400">order</span></p>
-            <p className="text-[11px] sm:text-xs font-bold text-amber-600 mt-1">{fmtRupiah(pendingTotal)} →</p>
+            <p className="text-[11px] sm:text-xs font-bold text-lavender-600 mt-1">{fmtRupiah(pendingTotal)} →</p>
           </a>
           <a href="#kalender" className="bg-white rounded-3xl shadow-card p-4 sm:p-5 border border-lavender-50 hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-2 mb-1.5">
@@ -310,9 +300,9 @@ export default function Dashboard({
           </div>
           <div className="flex flex-wrap gap-3 mb-4 text-[11px] font-extrabold">
             <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>Menunggu ACC</span>
-            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>Confirmed</span>
-            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>Reschedule</span>
-            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-lavender-400"></span>Selesai</span>
+            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-lavender-400"></span>ACC</span>
+            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-lavender-400"></span>Reschedule</span>
+            <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>Selesai</span>
             <span className="flex items-center gap-1.5 text-gray-500"><span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>Batal</span>
           </div>
           <div className="grid grid-cols-7 gap-1 sm:gap-2">
@@ -445,10 +435,10 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
         {pendingOrders && pendingOrders.length ? pendingOrders.map((o) => {
           const fix = o.tanggal_fix || o.tanggal_usulan
           return (
-            <div key={o.id} className="bg-white p-3 rounded-2xl shadow-sm border border-amber-100">
+            <div key={o.id} className="bg-white p-3 rounded-2xl shadow-sm border border-lavender-100">
               <div className="flex justify-between items-start gap-2">
                 <div className="min-w-0">
-                  <h4 className="text-sm font-extrabold text-gray-800 leading-tight">#{o.id} • {o.customer_name}</h4>
+                  <h4 className="text-sm font-extrabold text-gray-800 leading-tight">{o.order_number || `#${o.id}`} • {o.customer_name}</h4>
                   <p className="text-[11px] font-bold text-gray-400 mt-0.5 truncate">{o.alamat}</p>
                   <p className="text-[11px] font-bold text-gray-400"><i className="fa-regular fa-calendar mr-1"></i>Usulan: {fmtDateWIB(o.tanggal_usulan)}</p>
                   <p className="text-[11px] font-semibold text-gray-400 truncate">{(o.items || []).map((i) => `${i.service_name} (${i.qty}x)`).join(', ')}</p>
@@ -456,10 +446,10 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
                 <span className="text-xs font-extrabold text-peach-500 whitespace-nowrap">{fmtRupiah(o.total_harga)}</span>
               </div>
               <div className="mt-3">
-                <form onSubmit={(e) => submitAcc(e, o.id)} className="flex flex-nowrap items-center gap-1 bg-emerald-50 rounded-2xl p-1.5 w-full">
-                  <input type="date" name="tanggal_fix" defaultValue={toDateValue(fix)} className="min-w-0 flex-[1.15] text-[10px] font-bold bg-white rounded-full px-2 py-1.5 border border-emerald-200 focus:outline-none" />
-                  <input type="time" name="jam_fix" min={setting?.jam_mulai || '08:00'} max={setting?.jam_selesai || '17:00'} defaultValue={toTimeValue(fix)} className="min-w-0 flex-1 text-[10px] font-bold bg-white rounded-full px-2 py-1.5 border border-emerald-200 focus:outline-none" />
-                  <button className="shrink-0 px-2.5 py-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold hover:bg-emerald-600 whitespace-nowrap"><i className="fa-solid fa-check mr-0.5"></i>ACC</button>
+                <form onSubmit={(e) => submitAcc(e, o.id)} className="flex flex-nowrap items-center gap-1 bg-lavender-50 rounded-2xl p-1.5 w-full">
+                  <input type="date" name="tanggal_fix" defaultValue={toDateValue(fix)} className="min-w-0 flex-[1.15] text-[10px] font-bold bg-white rounded-full px-2 py-1.5 border border-lavender-200 focus:outline-none" />
+                  <input type="time" name="jam_fix" min={setting?.jam_mulai || '08:00'} max={setting?.jam_selesai || '17:00'} defaultValue={toTimeValue(fix)} className="min-w-0 flex-1 text-[10px] font-bold bg-white rounded-full px-2 py-1.5 border border-lavender-200 focus:outline-none" />
+                  <button className="shrink-0 px-2.5 py-1.5 rounded-full bg-lavender-600 text-white text-[10px] font-extrabold hover:bg-lavender-700 whitespace-nowrap"><i className="fa-solid fa-check mr-0.5"></i>ACC</button>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -475,7 +465,7 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
                       setOpenMenuId(o.id)
                     }}
                     title="Aksi lain"
-                    className="w-7 h-7 shrink-0 rounded-full bg-white text-gray-500 border border-emerald-200 flex items-center justify-center hover:bg-gray-50"
+                    className="w-7 h-7 shrink-0 rounded-full bg-white text-gray-500 border border-lavender-200 flex items-center justify-center hover:bg-gray-50"
                   >
                     <i className="fa-solid fa-ellipsis-vertical text-[10px]"></i>
                   </button>
@@ -512,22 +502,21 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
         if (!order) return null
         return (
           <div ref={menuRef} className="fixed w-56 bg-white rounded-2xl shadow-float border border-lavender-100 p-2 z-[60] max-h-[calc(100vh-16px)] overflow-auto" style={{ top: menuPos.top, left: menuPos.left }} onClick={(e)=>e.stopPropagation()}>
-            <a href={`/admin/pesanan/${order.id}?from=${from}`} onClick={()=>{ setOpenMenuId(null); setMenuAnchor(null) }} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-lavender-50 hover:text-lavender-600">
+            <a href={`/admin/pesanan/${order.id}?from=${from}`} onClick={()=>{ setOpenMenuId(null); setMenuAnchor(null) }} className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-800">
               <i className="fa-solid fa-eye w-4 text-center"></i> Lihat Detail
             </a>
-            <form onSubmit={(e)=>{ e.preventDefault(); const ket=(e.currentTarget.keterangan?.value||'').toString().trim(); setOpenMenuId(null); setMenuAnchor(null); confirm.open({ title:'Ajukan Perubahan Jadwal?', message:`Permintaan perubahan jadwal untuk pesanan #${order.id} akan diajukan ke pelanggan via WhatsApp.`, confirmText:'Ya, Ajukan', tone:'blue', icon:'fa-calendar-days', onConfirm:()=>doPatch(order.id,{ action:'ajukan_perubahan_jadwal', keterangan: ket }) }) }} className="mt-1 pt-2 border-t border-dashed border-gray-200">
+            <form onSubmit={(e)=>{ e.preventDefault(); const ket=(e.currentTarget.keterangan?.value||'').toString().trim(); setOpenMenuId(null); setMenuAnchor(null); confirm.open({ title:'Ajukan Perubahan Jadwal?', message:`Permintaan perubahan jadwal untuk pesanan ${order.order_number || `#${order.id}`} akan diajukan ke pelanggan via WhatsApp.`, confirmText:'Ya, Ajukan', tone:'blue', icon:'fa-calendar-days', onConfirm:()=>doPatch(order.id,{ action:'ajukan_perubahan_jadwal', keterangan: ket }) }) }} className="mt-1 pt-2 border-t border-dashed border-gray-200">
               <label className="block px-1 text-[11px] font-extrabold text-blue-600 mb-1">Ubah Jadwal (Ajukan Perubahan)</label>
               <input type="text" name="keterangan" placeholder="Keterangan (opsional)" className="w-full text-[11px] font-bold bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-300 mb-1.5" />
               <button className="w-full py-2 rounded-xl bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 flex items-center justify-center gap-1.5">
                 <i className="fa-solid fa-calendar-days"></i> Ajukan Perubahan Jadwal
               </button>
             </form>
-            <form onSubmit={(e)=>{ e.preventDefault(); const alasan=e.currentTarget.alasan_batal.value; if(!alasan) return; setOpenMenuId(null); setMenuAnchor(null); confirm.open({ title:'Batalkan Pesanan?', message:`Order #${order.id} akan dibatalkan (fix batal) tanpa mengirim WhatsApp.`, confirmText:'Ya, Batalkan', tone:'red', icon:'fa-ban', onConfirm:()=>doPatch(order.id,{ alasan_batal: alasan }) }) }} className="mt-1 pt-2 border-t border-dashed border-gray-200">
-              <input type="text" name="alasan_batal" required placeholder="Alasan batal..." className="w-full text-[11px] font-bold bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-red-300 mb-1.5" />
-              <button className="w-full py-2 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 flex items-center justify-center gap-1.5">
+            <div className="mt-1 pt-2 border-t border-dashed border-gray-200">
+              <button onClick={()=>{ setOpenMenuId(null); setMenuAnchor(null); confirm.open({ title:'Batalkan Pesanan?', message:`Pesanan ${order.order_number || `#${order.id}`} akan dibatalkan.`, confirmText:'Ya, Batalkan', tone:'red', icon:'fa-ban', onConfirm:()=>doPatch(order.id,{ action:'cancel', alasan_batal:'' }) }) }} className="w-full py-2 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 flex items-center justify-center gap-1.5">
                 <i className="fa-solid fa-ban"></i> Batalkan Pesanan
               </button>
-            </form>
+            </div>
           </div>
         )
       })()}

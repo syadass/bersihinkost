@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { orderSchema } from '@/lib/validations'
 import { toDateString } from '@/lib/date'
+import { attachDisplayNumbers, displayOrderNumber } from '@/lib/order-number'
 
 const TAB_MAP = {
   'menunggu-acc': ['pending', 'rescheduled'],
@@ -28,38 +29,60 @@ function yearRange(year) {
   return { start, end }
 }
 
-/** Tambahkan filter periode (bulan/tahun) pada where, mengikuti logika asli:
-   tanggal_fix ?? tanggal_usulan. */
-function applyPeriode(where, bulan, tahun) {
-  const and = []
-  const hasBulan = bulan !== 'all' && !Number.isNaN(Number(bulan))
-  const hasTahun = tahun !== 'all' && !Number.isNaN(Number(tahun))
+function dayStartEnd(dateStr, endOfDay = false) {
+  if (!dateStr) return null
+  const d = new Date(`${dateStr}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}`)
+  return Number.isNaN(d.getTime()) ? null : d
+}
 
-  if (hasBulan && hasTahun) {
-    const { start, end } = monthRange(Number(tahun), Number(bulan))
+/** Tambahkan filter periode pada where.
+   Prioritas: from/to (rentang tanggal). Fallback: bulan/tahun (kompatibilitas).
+   Logika: tanggal_fix ?? tanggal_usulan. */
+function applyPeriode(where, bulan, tahun, from, to) {
+  const and = []
+  const start = dayStartEnd(from, false)
+  const end = dayStartEnd(to, true)
+
+  if (start || end) {
+    const range = {}
+    if (start) range.gte = start
+    if (end) range.lte = end
     and.push({
       OR: [
-        { tanggal_fix: { not: null, gte: start, lte: end } },
-        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
+        { tanggal_fix: { not: null, ...range } },
+        { tanggal_fix: null, tanggal_usulan: range },
       ],
     })
-  } else if (hasBulan) {
-    const year = new Date().getFullYear()
-    const { start, end } = monthRange(year, Number(bulan))
-    and.push({
-      OR: [
-        { tanggal_fix: { not: null, gte: start, lte: end } },
-        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
-      ],
-    })
-  } else if (hasTahun) {
-    const { start, end } = yearRange(Number(tahun))
-    and.push({
-      OR: [
-        { tanggal_fix: { not: null, gte: start, lte: end } },
-        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
-      ],
-    })
+  } else {
+    const hasBulan = bulan !== 'all' && !Number.isNaN(Number(bulan))
+    const hasTahun = tahun !== 'all' && !Number.isNaN(Number(tahun))
+
+    if (hasBulan && hasTahun) {
+      const { start: s, end: e } = monthRange(Number(tahun), Number(bulan))
+      and.push({
+        OR: [
+          { tanggal_fix: { not: null, gte: s, lte: e } },
+          { tanggal_fix: null, tanggal_usulan: { gte: s, lte: e } },
+        ],
+      })
+    } else if (hasBulan) {
+      const year = new Date().getFullYear()
+      const { start: s, end: e } = monthRange(year, Number(bulan))
+      and.push({
+        OR: [
+          { tanggal_fix: { not: null, gte: s, lte: e } },
+          { tanggal_fix: null, tanggal_usulan: { gte: s, lte: e } },
+        ],
+      })
+    } else if (hasTahun) {
+      const { start: s, end: e } = yearRange(Number(tahun))
+      and.push({
+        OR: [
+          { tanggal_fix: { not: null, gte: s, lte: e } },
+          { tanggal_fix: null, tanggal_usulan: { gte: s, lte: e } },
+        ],
+      })
+    }
   }
 
   if (and.length) {
@@ -127,8 +150,12 @@ export async function GET(req) {
     const search = searchParams.get('search') || ''
     const bulan = searchParams.get('bulan') || 'all'
     const tahun = searchParams.get('tahun') || 'all'
+    const from = searchParams.get('from') || ''
+    const to = searchParams.get('to') || ''
     const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
-    const perPage = 5
+    const perPageRaw = parseInt(searchParams.get('perPage') || '5', 10)
+    const perPage = Math.min(Math.max(Number.isFinite(perPageRaw) ? perPageRaw : 5, 1), 200)
+    const skipMeta = searchParams.get('skipMeta') === '1'
 
     if (!ALLOWED_SORTS.includes(sort)) sort = 'terbaru'
     if (!TAB_MAP[tab] && tab !== 'all') tab = 'all'
@@ -143,23 +170,25 @@ export async function GET(req) {
         { alamat: { contains: search, mode: 'insensitive' } },
       ]
     }
-    where = applyPeriode(where, bulan, tahun)
+    where = applyPeriode(where, bulan, tahun, from, to)
 
-    const [orders, total, counts, years] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: { items: true },
-        orderBy: getOrderBy(sort),
-        skip: (page - 1) * perPage,
-        take: perPage,
-      }),
-      prisma.order.count({ where }),
-      getCounts(),
-      getOrderYears(),
-    ])
+    const listQuery = prisma.order.findMany({
+      where,
+      include: { items: true },
+      orderBy: getOrderBy(sort),
+      skip: (page - 1) * perPage,
+      take: perPage,
+    })
+    const countQuery = prisma.order.count({ where })
+
+    const [orders, total, counts, years] = skipMeta
+      ? [...await Promise.all([listQuery, countQuery]), null, []]
+      : await Promise.all([listQuery, countQuery, getCounts(), getOrderYears()])
+
+    const ordersWithNumbers = await attachDisplayNumbers(orders, prisma)
 
     return Response.json({
-      orders,
+      orders: ordersWithNumbers,
       counts,
       tab,
       sort,
@@ -170,6 +199,8 @@ export async function GET(req) {
       years,
       fBulan: bulan,
       fTahun: tahun,
+      from,
+      to,
     })
   } catch (err) {
     console.error('GET /api/orders error:', err)
@@ -223,11 +254,14 @@ export async function POST(req) {
       include: { items: true },
     })
 
+    const displayNo = await displayOrderNumber(order, prisma)
+    const orderForMsg = { ...order, order_number: displayNo }
     const setting = await prisma.setting.findUnique({ where: { id: 1 } })
-    const adminNotifyWaLink = composeAdminNotifyWaLink(order, setting)
+    const adminNotifyWaLink = composeAdminNotifyWaLink(orderForMsg, setting)
 
     return Response.json({
       order_id: order.id,
+      order_number: displayNo,
       admin_notify_wa_link: adminNotifyWaLink,
       success_url: `/orders/sukses/${order.id}`,
     }, { status: 201 })
@@ -238,7 +272,7 @@ export async function POST(req) {
 
 function composeAdminNotifyMessage(order, setting) {
   const lines = []
-  lines.push(`*Pesanan Baru Masuk* #${order.id}`)
+  lines.push(`*Pesanan Baru Masuk* ${displayOrderNumber(order)}`)
   lines.push(`Nama: ${order.customer_name}`)
   lines.push(`WA Customer: ${order.customer_wa || '-'}`)
   lines.push(`Alamat: ${order.alamat}`)

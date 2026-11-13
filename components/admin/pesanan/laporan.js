@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
+import LoadingState from '@/components/ui/loading-state'
 
 export default function PesananLaporan() {
   const sp = useSearchParams()
@@ -56,16 +57,8 @@ export default function PesananLaporan() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 animate-fade-in" style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
-            <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
-            <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
-              <i className="fa-solid fa-broom text-sm animate-pulse" />
-            </div>
-          </div>
-          <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
-        </div>
+      <div style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>
+        <LoadingState size="lg" className="min-h-screen flex items-center justify-center p-6 animate-fade-in" />
       </div>
     )
   }
@@ -132,7 +125,7 @@ export default function PesananLaporan() {
                   {!loading && rows.length ? rows.map((o) => (
                     <tr key={o.id} className="border-b border-gray-100">
                       <td className="px-4 py-4 align-top">
-                        <span className="font-extrabold block whitespace-nowrap">ORD-{String(o.id).padStart(3, '0')}</span>
+                        <span className="font-extrabold block whitespace-nowrap">{o.order_number || `ORD-#${o.id}`}</span>
                         <span className="text-xs text-gray-400">{fmtDate(o.updated_at)}</span>
                       </td>
                       <td className="px-4 py-4 align-top">
