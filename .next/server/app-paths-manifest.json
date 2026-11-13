@@ -3,7 +3,6 @@
   "/api/orders/route": "app/api/orders/route.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/api/auth/me/route": "app/api/auth/me/route.js",
   "/admin/layanan/page": "app/admin/layanan/page.js",
   "/admin/page": "app/admin/page.js",
   "/admin/pengaturan/page": "app/admin/pengaturan/page.js"

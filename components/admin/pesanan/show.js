@@ -36,18 +36,20 @@ function PesananShowInner({ params }) {
   const [editForm, setEditForm] = useState({ customer_name: '', customer_wa: '', alamat: '', tanggal_usulan: '', jam_usulan: '', catatan_admin: '', items: [] })
 
   const fromRaw = sp?.get('from') || ''
-  const from = (() => {
-    if (fromRaw) return fromRaw
+  const [from, setFrom] = useState(fromRaw)
+  useEffect(() => {
+    if (fromRaw) { setFrom(fromRaw); return }
     if (typeof document !== 'undefined' && document.referrer) {
       try {
         const ref = new URL(document.referrer)
         if (ref.origin === window.location.origin && ref.pathname.startsWith('/admin') && !/\/admin\/pesanan\/\d+/.test(ref.pathname)) {
-          return ref.pathname + ref.search
+          setFrom(ref.pathname + ref.search)
+          return
         }
       } catch {}
     }
-    return ''
-  })()
+    setFrom('')
+  }, [fromRaw])
   const backUrl = from || '/admin/pesanan'
   const fromParam = from ? `?from=${encodeURIComponent(from)}` : ''
 
