@@ -83,74 +83,92 @@ export default async function AdminDashboardPage({ searchParams }) {
   const chartBulan = sp.g_bulan ? parseInt(sp.g_bulan, 10) : (now.getUTCMonth() + 1)
   const chartTahun = sp.g_tahun ? parseInt(sp.g_tahun, 10) : now.getUTCFullYear()
 
-  const setting = await prisma.setting.findUnique({ where: { id: 1 } }).catch(() => null)
+  const { start: mStart, end: mEnd } = startEndOfMonth(now.getUTCFullYear(), now.getUTCMonth() + 1)
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStart = new Date(`${todayStr}T00:00:00.000Z`)
+  const todayEnd = new Date(`${todayStr}T23:59:59.999Z`)
+  const { start: calStart, end: calEnd } = startEndOfMonth(calYear, calMonth)
+  const { start: tStart, end: tEnd } = startEndOfMonth(chartTahun, chartBulan)
+  const { start: pieStart, end: pieEnd } = startEndOfMonth(chartTahun, chartBulan)
+
+  const [
+    setting,
+    yearRows,
+    ordersThisMonth,
+    pendingOrdersRaw,
+    jadwalHariIni,
+    calOrders,
+    trendOrders,
+    pieOrders,
+  ] = await Promise.all([
+    prisma.setting.findUnique({ where: { id: 1 } }).catch(() => null),
+    prisma.$queryRaw`
+      SELECT DISTINCT EXTRACT(YEAR FROM COALESCE("tanggal_fix", "tanggal_usulan"))::int AS year
+      FROM "Order"
+      WHERE COALESCE("tanggal_fix", "tanggal_usulan") IS NOT NULL
+      ORDER BY year ASC
+    `.catch(() => []),
+    prisma.order.findMany({
+      where: { created_at: { gte: mStart, lte: mEnd } },
+      select: { id: true, status: true, total_harga: true },
+    }).catch(() => []),
+    prisma.order.findMany({
+      where: { status: { in: ['pending', 'rescheduled'] } },
+      include: { items: true },
+      orderBy: { created_at: 'desc' },
+      take: 20,
+    }).catch(() => []),
+    prisma.order.count({
+      where: {
+        status: 'confirmed',
+        OR: [
+          { tanggal_fix: { gte: todayStart, lte: todayEnd } },
+          { tanggal_fix: null, tanggal_usulan: { gte: todayStart, lte: todayEnd } },
+        ],
+      },
+    }).catch(() => 0),
+    prisma.order.findMany({
+      where: {
+        OR: [
+          { tanggal_fix: { gte: calStart, lte: calEnd } },
+          { tanggal_fix: null, tanggal_usulan: { gte: calStart, lte: calEnd } },
+        ],
+      },
+      select: { id: true, customer_name: true, status: true, total_harga: true, tanggal_usulan: true, tanggal_fix: true },
+    }).catch(() => []),
+    prisma.order.findMany({
+      where: { created_at: { gte: tStart, lte: tEnd } },
+      select: { created_at: true, total_harga: true, status: true },
+    }).catch(() => []),
+    prisma.order.findMany({
+      where: {
+        status: { not: 'cancelled' },
+        created_at: { gte: pieStart, lte: pieEnd },
+      },
+      include: { items: true },
+    }).catch(() => []),
+  ])
+
   const safeSetting = setting || { business_name: 'Bersihinkost', operator_name: 'Admin', jam_mulai: '08:00', jam_selesai: '17:00' }
 
-  // Year options from orders
-  const allForYears = await prisma.order.findMany({ select: { tanggal_usulan: true, tanggal_fix: true, created_at: true } }).catch(() => [])
   const yearSet = new Set([now.getUTCFullYear(), chartTahun, calYear])
-  for (const o of allForYears) {
-    for (const d of [o.tanggal_usulan, o.tanggal_fix, o.created_at]) {
-      if (d) yearSet.add(new Date(d).getUTCFullYear())
-    }
+  for (const r of (Array.isArray(yearRows) ? yearRows : [])) {
+    const y = Number(r?.year)
+    if (Number.isFinite(y)) yearSet.add(y)
   }
   const years = Array.from(yearSet).filter(Number.isFinite).sort((a, b) => a - b)
 
-  // Current month stats (based on now)
-  const { start: mStart, end: mEnd } = startEndOfMonth(now.getUTCFullYear(), now.getUTCMonth() + 1)
-  const ordersThisMonth = await prisma.order.findMany({
-    where: { created_at: { gte: mStart, lte: mEnd } },
-    select: { id: true, status: true, total_harga: true },
-  }).catch(() => [])
   const completedThisMonth = ordersThisMonth.filter((o) => o.status === 'completed')
   const kasBulanIni = completedThisMonth.reduce((s, o) => s + (o.total_harga || 0), 0)
   const selesaiBulanIni = completedThisMonth.length
   const totalPesananBulanIni = ordersThisMonth.length
 
-  // Pending
-  const pendingOrdersRaw = await prisma.order.findMany({
-    where: { status: { in: ['pending', 'rescheduled'] } },
-    include: { items: true },
-    orderBy: { created_at: 'desc' },
-    take: 20,
-  }).catch(() => [])
   const pendingCount = pendingOrdersRaw.length
   const pendingTotal = pendingOrdersRaw.reduce((s, o) => s + (o.total_harga || 0), 0)
 
-  // Jadwal hari ini (confirmed today by effective date)
-  const todayStr = new Date().toISOString().slice(0, 10)
-  const todayStart = new Date(`${todayStr}T00:00:00.000Z`)
-  const todayEnd = new Date(`${todayStr}T23:59:59.999Z`)
-  const jadwalHariIni = await prisma.order.count({
-    where: {
-      status: 'confirmed',
-      OR: [
-        { tanggal_fix: { gte: todayStart, lte: todayEnd } },
-        { tanggal_fix: null, tanggal_usulan: { gte: todayStart, lte: todayEnd } },
-      ],
-    },
-  }).catch(() => 0)
-
-  // Calendar orders for selected month (all statuses)
-  const { start: calStart, end: calEnd } = startEndOfMonth(calYear, calMonth)
-  const calOrders = await prisma.order.findMany({
-    where: {
-      OR: [
-        { tanggal_fix: { gte: calStart, lte: calEnd } },
-        { tanggal_fix: null, tanggal_usulan: { gte: calStart, lte: calEnd } },
-      ],
-    },
-    select: { id: true, customer_name: true, status: true, total_harga: true, tanggal_usulan: true, tanggal_fix: true },
-  }).catch(() => [])
   const weeks = buildWeeks(monthDate, calOrders)
 
-  // Trend chart (daily counts for chartBulan/chartTahun)
-  const { start: tStart, end: tEnd } = startEndOfMonth(chartTahun, chartBulan)
   const daysInMonth = new Date(Date.UTC(chartTahun, chartBulan, 0)).getUTCDate()
-  const trendOrders = await prisma.order.findMany({
-    where: { created_at: { gte: tStart, lte: tEnd } },
-    select: { created_at: true, total_harga: true, status: true },
-  }).catch(() => [])
   const trendLabels = Array.from({ length: daysInMonth }, (_, i) => String(i + 1))
   const countsByDay = Array(daysInMonth).fill(0)
   let trendTotalPenghasilan = 0
@@ -164,15 +182,6 @@ export default async function AdminDashboardPage({ searchParams }) {
   const trendTotalPesanan = trendOrders.length
   const trendRataHarian = daysInMonth ? Math.round(trendTotalPenghasilan / daysInMonth) : 0
 
-  // Pie (service comparison) mengikuti periode tren (chartBulan/chartTahun)
-  const { start: pieStart, end: pieEnd } = startEndOfMonth(chartTahun, chartBulan)
-  const pieOrders = await prisma.order.findMany({
-    where: {
-      status: { not: 'cancelled' },
-      created_at: { gte: pieStart, lte: pieEnd },
-    },
-    include: { items: true },
-  }).catch(() => [])
   const colorPalette = ['#8b5cf6', '#fb7185', '#34d399', '#f59e0b', '#60a5fa', '#a78bfa', '#f472b6', '#10b981']
   const agg = new Map()
   for (const o of pieOrders) {

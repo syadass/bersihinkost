@@ -169,10 +169,10 @@ function PengaturanIndexInner() {
 
         <div className="flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100 self-start sm:self-auto">
           <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-            {initials(user.name)}
+            {initials(setting.operator_name || user.name)}
           </div>
           <div>
-            <p className="text-sm font-extrabold text-gray-800 leading-tight">{user.name}</p>
+            <p className="text-sm font-extrabold text-gray-800 leading-tight">{setting.operator_name || user.name}</p>
             <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
           </div>
         </div>

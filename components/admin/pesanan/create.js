@@ -49,7 +49,7 @@ export default function PesananCreate() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.message || 'Gagal menyimpan jadwal.')
-      window.location.href = `/admin/pesanan/${data.order_id}`
+      window.location.href = '/admin/pesanan?tab=terjadwal'
     } catch (err) {
       setError(err.message || 'Gagal menyimpan jadwal.')
     } finally {

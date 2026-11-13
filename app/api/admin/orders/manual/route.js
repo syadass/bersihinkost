@@ -22,14 +22,18 @@ export async function POST(req) {
     }
 
     const tanggal = combineDateTime(data.tanggal_fix, data.jam_fix)
+    const tanggalDate = new Date(tanggal)
+    if (!tanggal || Number.isNaN(tanggalDate.getTime())) {
+      return Response.json({ message: 'Tanggal/jam pengerjaan tidak valid.' }, { status: 422 })
+    }
 
     const order = await prisma.order.create({
       data: {
         customer_name: data.customer_name,
-        customer_wa: data.customer_wa || '',
+        customer_wa: (data.customer_wa || '').replace(/[^0-9+]/g, ''),
         alamat: data.alamat,
-        tanggal_usulan: new Date(tanggal),
-        tanggal_fix: new Date(tanggal),
+        tanggal_usulan: tanggalDate,
+        tanggal_fix: tanggalDate,
         total_harga: total,
         estimasi_menit: estimasi,
         status: 'confirmed',

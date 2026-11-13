@@ -32,11 +32,28 @@ function yearRange(year) {
    tanggal_fix ?? tanggal_usulan. */
 function applyPeriode(where, bulan, tahun) {
   const and = []
-  if (bulan !== 'all') {
-    const b = Number(bulan)
-    const now = new Date()
-    const year = now.getFullYear() // bulan filter berlaku tahun ini jika tahun all
-    const { start, end } = monthRange(year, b)
+  const hasBulan = bulan !== 'all' && !Number.isNaN(Number(bulan))
+  const hasTahun = tahun !== 'all' && !Number.isNaN(Number(tahun))
+
+  if (hasBulan && hasTahun) {
+    const { start, end } = monthRange(Number(tahun), Number(bulan))
+    and.push({
+      OR: [
+        { tanggal_fix: { not: null, gte: start, lte: end } },
+        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
+      ],
+    })
+  } else if (hasBulan) {
+    const year = new Date().getFullYear()
+    const { start, end } = monthRange(year, Number(bulan))
+    and.push({
+      OR: [
+        { tanggal_fix: { not: null, gte: start, lte: end } },
+        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
+      ],
+    })
+  } else if (hasTahun) {
+    const { start, end } = yearRange(Number(tahun))
     and.push({
       OR: [
         { tanggal_fix: { not: null, gte: start, lte: end } },
@@ -44,16 +61,7 @@ function applyPeriode(where, bulan, tahun) {
       ],
     })
   }
-  if (tahun !== 'all') {
-    const y = Number(tahun)
-    const { start, end } = yearRange(y)
-    and.push({
-      OR: [
-        { tanggal_fix: { not: null, gte: start, lte: end } },
-        { tanggal_fix: null, tanggal_usulan: { gte: start, lte: end } },
-      ],
-    })
-  }
+
   if (and.length) {
     where.AND = and
   }
@@ -76,36 +84,39 @@ function getOrderBy(sort) {
 }
 
 async function getCounts() {
+  const [all, menungguAcc, terjadwal, selesai, batal] = await Promise.all([
+    prisma.order.count(),
+    prisma.order.count({ where: { status: { in: ['pending', 'rescheduled'] } } }),
+    prisma.order.count({ where: { status: 'confirmed' } }),
+    prisma.order.count({ where: { status: 'completed' } }),
+    prisma.order.count({ where: { status: 'cancelled' } }),
+  ])
   return {
-    all: await prisma.order.count(),
-    'menunggu-acc': await prisma.order.count({ where: { status: { in: ['pending', 'rescheduled'] } } }),
-    terjadwal: await prisma.order.count({ where: { status: 'confirmed' } }),
-    selesai: await prisma.order.count({ where: { status: 'completed' } }),
-    batal: await prisma.order.count({ where: { status: 'cancelled' } }),
+    all,
+    'menunggu-acc': menungguAcc,
+    terjadwal,
+    selesai,
+    batal,
   }
 }
 
 async function getOrderYears() {
-  const usulan = await prisma.order.findMany({
-    select: { tanggal_usulan: true },
-    distinct: ['tanggal_usulan'],
-  })
-  const fix = await prisma.order.findMany({
-    where: { tanggal_fix: { not: null } },
-    select: { tanggal_fix: true },
-    distinct: ['tanggal_fix'],
-  })
-  const years = new Set()
-  for (const r of usulan) {
-    const s = toDateString(r.tanggal_usulan)
-    if (s) years.add(s.slice(0, 4))
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT DISTINCT EXTRACT(YEAR FROM COALESCE("tanggal_fix", "tanggal_usulan"))::int AS year
+      FROM "Order"
+      WHERE COALESCE("tanggal_fix", "tanggal_usulan") IS NOT NULL
+      ORDER BY year ASC
+    `
+    const years = (Array.isArray(rows) ? rows : [])
+      .map((r) => String(r.year))
+      .filter(Boolean)
+    if (years.length === 0) years.push(String(new Date().getFullYear()))
+    return years
+  } catch {
+    const fallbackYear = String(new Date().getFullYear())
+    return [fallbackYear]
   }
-  for (const r of fix) {
-    const s = toDateString(r.tanggal_fix)
-    if (s) years.add(s.slice(0, 4))
-  }
-  if (years.size === 0) years.add(new Date().toISOString().slice(0, 4))
-  return [...years].sort()
 }
 
 export async function GET(req) {

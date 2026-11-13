@@ -27,6 +27,7 @@ function LayananIndexInner({ userName }) {
   const [categoryNames, setCategoryNames] = useState([])
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState({ ok: '', err: '' })
+  const [displayName, setDisplayName] = useState(userName || 'Administrator')
 
   const category = sp.get('category') || 'all'
   const search = sp.get('search') || ''
@@ -90,6 +91,13 @@ function LayananIndexInner({ userName }) {
   }
 
   useEffect(() => { load() }, [category, search])
+
+  useEffect(() => {
+    fetch('/api/settings', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => { if (d?.setting?.operator_name) setDisplayName(d.setting.operator_name) })
+      .catch(() => {})
+  }, [])
 
   const catActiveCls = 'px-5 py-2.5 rounded-full bg-lavender-600 text-white font-bold text-sm shadow-md flex items-center gap-2 whitespace-nowrap transition-transform hover:scale-105'
   const catIdleCls = 'px-5 py-2.5 rounded-full bg-white text-gray-600 font-bold text-sm shadow-card hover:bg-lavender-50 hover:text-lavender-600 transition-all flex items-center gap-2 whitespace-nowrap'
@@ -259,10 +267,10 @@ function LayananIndexInner({ userName }) {
 
             <div className="hidden sm:flex items-center gap-3 bg-white pl-3 pr-5 py-2 rounded-full shadow-card border border-lavender-100 shrink-0 xl:self-auto">
               <div className="w-10 h-10 rounded-full bg-peach-100 text-peach-600 flex items-center justify-center font-extrabold border-2 border-white shadow-sm">
-                {initials(userName)}
+                {initials(displayName)}
               </div>
               <div>
-                <p className="text-sm font-extrabold text-gray-800 leading-tight">{userName}</p>
+                <p className="text-sm font-extrabold text-gray-800 leading-tight">{displayName}</p>
                 <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
               </div>
             </div>

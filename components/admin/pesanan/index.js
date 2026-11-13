@@ -65,6 +65,7 @@ function PesananIndexInner({ userName }) {
   const [searchInput, setSearchInput] = useState('')
   const [setting, setSetting] = useState({ jam_mulai: '08:00', jam_selesai: '17:00' })
   const [services, setServices] = useState([])
+  const [displayName, setDisplayName] = useState(userName || 'Administrator')
   const [manualOpen, setManualOpen] = useState(false)
   const [manualForm, setManualForm] = useState({ customer_name: '', customer_wa: '', alamat: '', tanggal_fix: new Date().toISOString().slice(0,10), jam_fix: '09:00', items: [{ service_id: '', qty: 1 }] })
   const [manualErr, setManualErr] = useState('')
@@ -133,7 +134,12 @@ function PesananIndexInner({ userName }) {
   useEffect(() => { load() }, [initialized, tab, sort, search, bulan, tahun, page])
 
   useEffect(() => {
-    fetch('/api/settings', { cache: 'no-store' }).then(r=>r.json()).then(d=>{ if(d.setting) setSetting(s=>({...s, ...d.setting})) }).catch(()=>{})
+    fetch('/api/settings', { cache: 'no-store' }).then(r=>r.json()).then(d=>{
+      if(d.setting) {
+        setSetting(s=>({...s, ...d.setting}))
+        if (d.setting.operator_name) setDisplayName(d.setting.operator_name)
+      }
+    }).catch(()=>{})
     fetch('/api/services', { cache: 'no-store' }).then(r=>r.json()).then(d=>{
       const sv = (d.services || []).map(s=>({id:s.id,name:s.name,price:s.price}))
       setServices(sv)
@@ -229,7 +235,7 @@ function PesananIndexInner({ userName }) {
   }
 
   const initials = (() => {
-    const parts = String(userName || 'A').trim().split(/\s+/)
+    const parts = String(displayName || 'A').trim().split(/\s+/)
     return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || '')).toUpperCase()
   })()
 
@@ -256,7 +262,7 @@ function PesananIndexInner({ userName }) {
               </form>
 
               <div className="flex items-center gap-2 shrink-0">
-                <button type="button" onClick={()=>{ setManualErr(''); setManualOpen(true) }} className="flex-1 min-[480px]:flex-none px-4 py-3 rounded-3xl bg-peach-500 text-white font-extrabold text-xs shadow-md hover:bg-peach-600 transition-all flex items-center justify-center gap-2 whitespace-nowrap" title="Buat jadwal manual">
+                <button type="button" onClick={()=>{ setManualErr(''); setManualForm({ customer_name: '', customer_wa: '', alamat: '', tanggal_fix: new Date().toISOString().slice(0, 10), jam_fix: '09:00', items: [{ service_id: services[0]?.id ? String(services[0].id) : '', qty: 1 }] }); setManualOpen(true) }} className="flex-1 min-[480px]:flex-none px-4 py-3 rounded-3xl bg-peach-500 text-white font-extrabold text-xs shadow-md hover:bg-peach-600 transition-all flex items-center justify-center gap-2 whitespace-nowrap" title="Buat jadwal manual">
                   <i className="fa-solid fa-plus text-[10px]"></i> Buat Manual
                 </button>
 
@@ -273,7 +279,7 @@ function PesananIndexInner({ userName }) {
                 {initials}
               </div>
               <div>
-                <p className="text-sm font-extrabold text-gray-800 leading-tight">{userName}</p>
+                <p className="text-sm font-extrabold text-gray-800 leading-tight">{displayName}</p>
                 <p className="text-[10px] font-extrabold text-peach-500 uppercase tracking-wider">Solo Operator</p>
               </div>
             </div>
@@ -314,55 +320,86 @@ function PesananIndexInner({ userName }) {
       <div className="flex-1 overflow-y-auto pb-6 sm:pr-2 min-h-0">
         {/* Mobile cards */}
         <div className="grid gap-3 md:hidden">
-          {!loading && (data.orders || []).length ? (data.orders || []).map((order) => (
-            <Link key={order.id} href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="block bg-white rounded-2xl shadow-card border border-lavender-50 p-4 active:scale-[0.99] transition-transform">
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-gray-800 truncate">#{order.id} • {order.customer_name}</p>
-                  <p className="text-[11px] font-semibold text-gray-400 truncate">{order.alamat}</p>
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-card border border-lavender-50 p-4 animate-fade-in">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="h-4 w-40 rounded-lg skeleton"></div>
+                    <div className="h-3 w-56 max-w-full rounded-lg skeleton"></div>
+                  </div>
+                  <div className="h-6 w-20 rounded-full skeleton shrink-0"></div>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold whitespace-nowrap shrink-0 ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
+                <div className="h-3 w-full rounded-lg skeleton mb-3"></div>
+                <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-100">
+                  <div className="h-3 w-28 rounded-lg skeleton"></div>
+                  <div className="h-4 w-20 rounded-lg skeleton"></div>
+                </div>
               </div>
-              <p className="text-[11px] font-semibold text-gray-500 truncate mb-2">{(order.items || []).map(i=>`${i.service_name} (${i.qty}x)`).join(', ')}</p>
-              <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-100">
-                <span className="text-[11px] font-bold text-gray-400"><i className="fa-regular fa-clock mr-1"></i>{fmtDateShort(order.tanggal_fix || order.tanggal_usulan)}, {fmtTime(order.tanggal_fix || order.tanggal_usulan)}</span>
-                <span className="text-sm font-extrabold text-gray-800">Rp{Number(order.total_harga||0).toLocaleString('id-ID')}</span>
-              </div>
-            </Link>
-          )) : !loading ? (
-            <div className="flex flex-col items-center justify-center text-center py-14 bg-white rounded-2xl shadow-card border border-lavender-50">
+            ))
+          ) : (data.orders || []).length ? (
+            <div className="grid gap-3 animate-fade-in">
+              {(data.orders || []).map((order) => (
+                <Link key={order.id} href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="block bg-white rounded-2xl shadow-card border border-lavender-50 p-4 active:scale-[0.99] transition-all duration-200 hover:shadow-md">
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="min-w-0">
+                      <p className="text-sm font-extrabold text-gray-800 truncate">#{order.id} • {order.customer_name}</p>
+                      <p className="text-[11px] font-semibold text-gray-400 truncate">{order.alamat}</p>
+                    </div>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold whitespace-nowrap shrink-0 ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
+                  </div>
+                  <p className="text-[11px] font-semibold text-gray-500 truncate mb-2">{(order.items || []).map(i=>`${i.service_name} (${i.qty}x)`).join(', ')}</p>
+                  <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-100">
+                    <span className="text-[11px] font-bold text-gray-400"><i className="fa-regular fa-clock mr-1"></i>{fmtDateShort(order.tanggal_fix || order.tanggal_usulan)}, {fmtTime(order.tanggal_fix || order.tanggal_usulan)}</span>
+                    <span className="text-sm font-extrabold text-gray-800">Rp{Number(order.total_harga||0).toLocaleString('id-ID')}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center py-14 bg-white rounded-2xl shadow-card border border-lavender-50 animate-fade-in">
               <div className="w-16 h-16 rounded-full bg-lavender-50 text-lavender-300 flex items-center justify-center text-2xl mb-3 border-2 border-dashed border-lavender-200">
                 <i className="fa-solid fa-inbox"></i>
               </div>
               <p className="text-sm font-extrabold text-gray-700">Tidak ada pesanan ditemukan</p>
               <p className="text-[11px] font-medium text-gray-400 mt-1">Pesanan baru dari pemesan kost akan muncul di sini</p>
             </div>
-          ) : (
-            <div className="text-center py-10 text-gray-400 font-bold">Memuat...</div>
           )}
         </div>
 
         {/* Desktop table */}
-        <div className="hidden md:block bg-white rounded-3xl shadow-card border border-lavender-50">
+        <div className="hidden md:block bg-white rounded-3xl shadow-card border border-lavender-50 transition-all duration-300">
           <div className="table-scroll overflow-x-auto rounded-3xl">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-100 bg-lavender-50/50 text-gray-500 text-xs font-extrabold uppercase tracking-wider">
-                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('id_asc','id_desc'))} className="inline-flex items-center hover:text-lavender-600" title="Urutkan ID">ID {arrow('id_asc','id_desc')}</button></th>
-                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('nama_asc','nama_desc'))} className="inline-flex items-center hover:text-lavender-600" title="Urutkan nama">Pemesan {arrow('nama_asc','nama_desc')}</button></th>
+                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('id_asc','id_desc'))} className="inline-flex items-center hover:text-lavender-600 transition-colors" title="Urutkan ID">ID {arrow('id_asc','id_desc')}</button></th>
+                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('nama_asc','nama_desc'))} className="inline-flex items-center hover:text-lavender-600 transition-colors" title="Urutkan nama">Pemesan {arrow('nama_asc','nama_desc')}</button></th>
                   <th className="py-4 px-6">Layanan</th>
-                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('fix_asc','fix_desc'))} className="inline-flex items-center hover:text-lavender-600" title="Urutkan tanggal pengerjaan (fix)">Jadwal {arrow('fix_asc','fix_desc')}</button></th>
+                  <th className="py-4 px-6"><button type="button" onClick={()=>navigateWith(sortLink('fix_asc','fix_desc'))} className="inline-flex items-center hover:text-lavender-600 transition-colors" title="Urutkan tanggal pengerjaan (fix)">Jadwal {arrow('fix_asc','fix_desc')}</button></th>
                   <th className="py-4 px-6">Tarif</th>
                   <th className="py-4 px-6">Status</th>
                   <th className="py-4 px-6 text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="ordersTableBody" className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
-                {(data.orders || []).map((order) => {
+              <tbody id="ordersTableBody" className={`divide-y divide-gray-100 text-sm font-semibold text-gray-700 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100 animate-fade-in'}`}>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={`s-${i}`}>
+                      <td className="py-4 px-6"><div className="h-4 w-10 rounded-lg skeleton"></div></td>
+                      <td className="py-4 px-6"><div className="space-y-2"><div className="h-4 w-28 rounded-lg skeleton"></div><div className="h-3 w-40 rounded-lg skeleton"></div></div></td>
+                      <td className="py-4 px-6"><div className="h-4 w-44 rounded-lg skeleton"></div></td>
+                      <td className="py-4 px-6"><div className="space-y-2"><div className="h-4 w-24 rounded-lg skeleton"></div><div className="h-3 w-20 rounded-lg skeleton"></div></div></td>
+                      <td className="py-4 px-6"><div className="h-4 w-20 rounded-lg skeleton"></div></td>
+                      <td className="py-4 px-6"><div className="h-6 w-24 rounded-full skeleton"></div></td>
+                      <td className="py-4 px-6"><div className="h-8 w-16 mx-auto rounded-xl skeleton"></div></td>
+                    </tr>
+                  ))
+                ) : (data.orders || []).map((order) => {
                   const svcText = (order.items || []).map(i=>`${i.service_name} (${i.qty}x)`).join(', ')
                   const jadwal = order.tanggal_fix || order.tanggal_usulan
                   return (
-                    <tr key={order.id} className="hover:bg-lavender-50/30 transition-colors">
+                    <tr key={order.id} className="hover:bg-lavender-50/30 transition-colors duration-200">
                       <td className="py-4 px-6">
                         <span className="font-extrabold text-gray-800 block whitespace-nowrap">#{order.id}</span>
                       </td>
@@ -381,7 +418,7 @@ function PesananIndexInner({ userName }) {
                         Rp{Number(order.total_harga||0).toLocaleString('id-ID')}
                       </td>
                       <td className="py-4 px-6 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold transition-colors ${miniBadge[order.status] || 'bg-gray-100 text-gray-500'}`}>{miniLabel[order.status] || order.status}</span>
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center justify-center gap-1.5">
@@ -389,16 +426,16 @@ function PesananIndexInner({ userName }) {
                             <form onSubmit={(e)=>{ e.preventDefault(); const fd=new FormData(e.currentTarget); confirm.open({ title:'ACC Pesanan?', message:`Pesanan #${order.id} akan di-ACC.`, confirmText:'Ya, ACC', tone:'emerald', icon:'fa-check', onConfirm:()=>doPatch(order.id,{ action:'acc', tanggal_fix:fd.get('tanggal_fix'), jam_fix:fd.get('jam_fix') }) }) }} title={`ACC (fix: ${fmtDateShort(jadwal)}, ${fmtTime(jadwal)})`}>
                               <input type="hidden" name="tanggal_fix" value={toDateValue(jadwal)} />
                               <input type="hidden" name="jam_fix" value={toTimeValue(jadwal)} />
-                              <button className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-sm" title="ACC Pesanan">
+                              <button className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all duration-200 shadow-sm" title="ACC Pesanan">
                                 <i className="fa-solid fa-check text-xs"></i>
                               </button>
                             </form>
                           ) : order.status === 'confirmed' ? (
-                            <button onClick={()=>confirm.open({ title:'Tandai Selesai?', message:`Order #${order.id} akan ditandai selesai dan masuk kas.`, confirmText:'Ya, Selesaikan', tone:'emerald', icon:'fa-check-double', onConfirm:()=>doPatch(order.id,{ status:'completed' }) })} className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-colors shadow-sm" title="Selesaikan Pesanan">
+                            <button onClick={()=>confirm.open({ title:'Tandai Selesai?', message:`Order #${order.id} akan ditandai selesai dan masuk kas.`, confirmText:'Ya, Selesaikan', tone:'emerald', icon:'fa-check-double', onConfirm:()=>doPatch(order.id,{ status:'completed' }) })} className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all duration-200 shadow-sm" title="Selesaikan Pesanan">
                               <i className="fa-solid fa-check-double text-xs"></i>
                             </button>
                           ) : (
-                            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} title="Detail" className="w-8 h-8 rounded-xl bg-lavender-600 text-white flex items-center justify-center hover:bg-lavender-700 transition-colors shadow-sm">
+                            <Link href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} title="Detail" className="w-8 h-8 rounded-xl bg-lavender-600 text-white flex items-center justify-center hover:bg-lavender-700 transition-all duration-200 shadow-sm">
                               <i className="fa-solid fa-eye text-xs"></i>
                             </Link>
                           )}
@@ -421,7 +458,7 @@ function PesananIndexInner({ userName }) {
                                 setOpenMenuId(order.id)
                               }}
                               title="Aksi lain"
-                              className="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                              className="w-8 h-8 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-all duration-200"
                             >
                               <i className="fa-solid fa-ellipsis-vertical text-xs"></i>
                             </button>
@@ -435,7 +472,7 @@ function PesananIndexInner({ userName }) {
             </table>
           </div>
 
-          <div id="emptyOrders" className={`${!loading && (data.orders||[]).length===0 ? 'flex' : 'hidden'} flex-col items-center justify-center text-center py-16`}>
+          <div id="emptyOrders" className={`${!loading && (data.orders||[]).length===0 ? 'flex' : 'hidden'} flex-col items-center justify-center text-center py-16 animate-fade-in`}>
             <div className="w-20 h-20 rounded-full bg-lavender-50 text-lavender-300 flex items-center justify-center text-3xl mb-3 border-2 border-dashed border-lavender-200">
               <i className="fa-solid fa-inbox"></i>
             </div>
@@ -517,8 +554,17 @@ function PesananIndexInner({ userName }) {
                 const d = await r.json().catch(()=>({}))
                 if(!r.ok) throw new Error(d.message||'Gagal menyimpan jadwal.')
                 setManualOpen(false)
-                await load()
-                router.push(`/admin/pesanan/${d.order_id}`)
+                setManualForm({
+                  customer_name: '',
+                  customer_wa: '',
+                  alamat: '',
+                  tanggal_fix: new Date().toISOString().slice(0, 10),
+                  jam_fix: '09:00',
+                  items: [{ service_id: services[0]?.id ? String(services[0].id) : '', qty: 1 }],
+                })
+                setSearchInput('')
+                setSearchParams({ tab: 'terjadwal', sort: 'terbaru', search: '', bulan: 'all', tahun: 'all', page: '1' })
+                router.replace('/admin/pesanan?tab=terjadwal')
               } catch(err){ setManualErr(err.message||'Gagal menyimpan jadwal.') }
             }} className="overflow-y-auto p-5 space-y-4">
               {manualErr && <div className="bg-red-50 border border-red-200 text-red-500 text-xs font-bold px-4 py-3 rounded-2xl">{manualErr}</div>}
