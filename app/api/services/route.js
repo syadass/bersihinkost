@@ -55,7 +55,7 @@ export async function POST(req) {
     }
     const data = serviceSchema.parse(raw)
 
-    // Handle file upload (simpan ke public/uploads/services)
+    // Handle file upload (simpan ke public/uploads/services, fallback data URL di hosting read-only)
     let imageUrl = data.image_url || null
     const file = form.get('image_file')
     if (file && file.size > 0) {
@@ -65,9 +65,18 @@ export async function POST(req) {
       const fs = await import('fs/promises')
       const path = await import('path')
       const dir = path.join(process.cwd(), 'public', 'uploads', 'services')
-      await fs.mkdir(dir, { recursive: true })
-      await fs.writeFile(path.join(dir, fileName), buffer)
-      imageUrl = `/uploads/services/${fileName}`
+      try {
+        await fs.mkdir(dir, { recursive: true })
+        await fs.writeFile(path.join(dir, fileName), buffer)
+        imageUrl = `/uploads/services/${fileName}`
+      } catch (err) {
+        if (['EROFS', 'EACCES', 'EPERM'].includes(err?.code)) {
+          const mime = file.type || `image/${ext === 'jpg' ? 'jpeg' : ext}`
+          imageUrl = `data:${mime};base64,${buffer.toString('base64')}`
+        } else {
+          throw err
+        }
+      }
     }
 
     await prisma.service.create({

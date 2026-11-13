@@ -29,9 +29,18 @@ export async function PUT(req, { params }) {
       const ext = (file.name?.split('.').pop() || 'jpg').toLowerCase()
       const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
       const dir = path.join(process.cwd(), 'public', 'uploads', 'services')
-      await fs.mkdir(dir, { recursive: true })
-      await fs.writeFile(path.join(dir, fileName), buffer)
-      newImage = `/uploads/services/${fileName}`
+      try {
+        await fs.mkdir(dir, { recursive: true })
+        await fs.writeFile(path.join(dir, fileName), buffer)
+        newImage = `/uploads/services/${fileName}`
+      } catch (err) {
+        if (['EROFS', 'EACCES', 'EPERM'].includes(err?.code)) {
+          const mime = file.type || `image/${ext === 'jpg' ? 'jpeg' : ext}`
+          newImage = `data:${mime};base64,${buffer.toString('base64')}`
+        } else {
+          throw err
+        }
+      }
     }
 
     // Hapus gambar lama jika ada gambar baru atau dicentang hapus
