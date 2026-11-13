@@ -243,7 +243,12 @@ function PesananIndexInner({ userName }) {
     return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || '')).toUpperCase()
   })()
 
-  const fromUrl = typeof window !== 'undefined' ? (window.location.pathname + window.location.search || '/admin/pesanan') : '/admin/pesanan'
+  const [fromUrl, setFromUrl] = useState('/admin/pesanan')
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setFromUrl(window.location.pathname + window.location.search || '/admin/pesanan')
+    }
+  }, [tab, sort, search, bulan, tahun, page])
 
   return (
     <>

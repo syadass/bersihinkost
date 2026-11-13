@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useConfirmModal } from '@/components/layouts/admin'
 
@@ -24,6 +24,7 @@ function LayananIndexInner({ userName }) {
   const [loading, setLoading] = useState(true)
   const [msg, setMsg] = useState({ ok: '', err: '' })
   const [displayName, setDisplayName] = useState(userName || 'Administrator')
+  const reqSeqRef = useRef(0)
 
   const category = sp.get('category') || 'all'
   const search = sp.get('search') || ''
@@ -48,6 +49,7 @@ function LayananIndexInner({ userName }) {
   useEffect(() => { setSearchInput(search) }, [search])
 
   async function load() {
+    const seq = ++reqSeqRef.current
     setLoading(true)
     try {
       const qs = new URLSearchParams()
@@ -55,6 +57,7 @@ function LayananIndexInner({ userName }) {
       if (search) qs.set('search', search)
       const r = await fetch(`/api/services?${qs.toString()}`, { cache: 'no-store' })
       const d = await r.json().catch(() => ({}))
+      if (seq !== reqSeqRef.current) return
       if (!r.ok) {
         throw new Error(d?.message || 'Gagal memuat layanan.')
       }
@@ -67,12 +70,14 @@ function LayananIndexInner({ userName }) {
       // categories with counts from /api/categories + derive from services if needed
       const cr = await fetch('/api/categories', { cache: 'no-store' })
       const cd = await cr.json().catch(() => ({}))
+      if (seq !== reqSeqRef.current) return
       const cats = Array.isArray(cd.categories) ? cd.categories : []
       // enrich counts
       let all = svcs
       if (category !== 'all' || search) {
         const ar = await fetch('/api/services', { cache: 'no-store' })
         const ad = await ar.json().catch(() => ({}))
+        if (seq !== reqSeqRef.current) return
         if (ar.ok) all = Array.isArray(ad.services) ? ad.services : svcs
       }
       const counts = {}
@@ -81,9 +86,10 @@ function LayananIndexInner({ userName }) {
       setCategoryNames(cats.map((c) => c.name))
       setMsg((m) => ({ ...m, err: '' }))
     } catch (err) {
+      if (seq !== reqSeqRef.current) return
       setMsg((m) => ({ ok: '', err: err?.message || 'Gagal memuat layanan.' }))
     } finally {
-      setLoading(false)
+      if (seq === reqSeqRef.current) setLoading(false)
     }
   }
 
