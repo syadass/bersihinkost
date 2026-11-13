@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import AdminLayout from '@/components/layouts/admin'
+// Admin layout disediakan oleh app/admin/layout.js
 
 function toDateValue(iso) {
   if (!iso) return ''
@@ -82,11 +82,22 @@ export default function PesananEdit({ params }) {
     } finally { setSaving(false) }
   }
 
-  if (loading) return <AdminLayout><div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl">Memuat...</div></AdminLayout>
-  if (!order) return <AdminLayout><div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl">Pesanan tidak ditemukan.</div></AdminLayout>
+  if (loading) return (
+    <div className="h-full min-h-[60vh] flex items-center justify-center p-6 animate-fade-in">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
+          <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
+          <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
+            <i className="fa-solid fa-broom text-sm animate-pulse" />
+          </div>
+        </div>
+        <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
+      </div>
+    </div>
+  )
+  if (!order) return <div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div>
 
   return (
-    <AdminLayout>
       <div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl">
         <Link href={backToDetail} className="text-xs font-extrabold text-lavender-500">← Kembali ke detail</Link>
         <h1 className="text-2xl font-extrabold text-gray-800 mt-1">Ubah Pesanan #{id}</h1>
@@ -138,6 +149,5 @@ export default function PesananEdit({ params }) {
           <button disabled={saving} className="w-full py-3 rounded-2xl bg-lavender-600 text-white font-extrabold text-sm">{saving ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
         </form>
       </div>
-    </AdminLayout>
   )
 }

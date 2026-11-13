@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AdminLayout, { useConfirmModal } from '@/components/layouts/admin'
+import { useConfirmModal } from '@/components/layouts/admin'
 import InvoiceSheet from './_invoice_sheet'
 
 function toDateValue(iso) {
@@ -18,11 +18,7 @@ function toTimeValue(iso) {
 }
 
 export default function PesananShow({ params }) {
-  return (
-    <AdminLayout>
-      <PesananShowInner params={params} />
-    </AdminLayout>
-  )
+  return <PesananShowInner params={params} />
 }
 
 function PesananShowInner({ params }) {
@@ -149,8 +145,20 @@ function PesananShowInner({ params }) {
     }
   }
 
-  if (loading) return <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-6"><div className="max-w-4xl mx-auto">Memuat...</div></div>
-  if (!order) return <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-6"><div className="max-w-4xl mx-auto">Pesanan tidak ditemukan.</div></div>
+  if (loading) return (
+    <div className="h-full min-h-[60vh] flex items-center justify-center p-6 animate-fade-in">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
+          <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
+          <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
+            <i className="fa-solid fa-broom text-sm animate-pulse" />
+          </div>
+        </div>
+        <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
+      </div>
+    </div>
+  )
+  if (!order) return <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-6"><div className="max-w-4xl mx-auto text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div></div>
 
   const sc = statusConfig[order.status] || statusConfig.pending
   const editable = !['cancelled', 'completed'].includes(order.status)

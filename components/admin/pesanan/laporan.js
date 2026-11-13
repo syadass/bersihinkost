@@ -54,6 +54,22 @@ export default function PesananLaporan() {
     if (!loading && sp?.get('cetak')) window.print()
   }, [loading, sp])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 animate-fade-in" style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC' }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative w-16 h-16 rounded-full bg-white shadow-card border border-lavender-100 flex items-center justify-center">
+            <div className="absolute inset-1.5 rounded-full border-4 border-lavender-100 border-t-lavender-500 animate-spin" aria-hidden="true" />
+            <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-lavender-500 to-lavender-700 text-white flex items-center justify-center shadow-inner">
+              <i className="fa-solid fa-broom text-sm animate-pulse" />
+            </div>
+          </div>
+          <p className="text-sm font-extrabold text-lavender-500">Memuat...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen py-6 px-4" style={{ fontFamily: "'Nunito', sans-serif", background: '#F9F8FC', color: '#2D3748' }}>
       <style>{`
@@ -126,12 +142,10 @@ export default function PesananLaporan() {
                       <td className="px-4 py-4 align-top text-gray-600 text-[13px]">{(o.items || []).map(it => `${it.service_name} (${it.qty}x)`).join(', ')}</td>
                       <td className="px-4 py-4 text-right align-top font-extrabold whitespace-nowrap">Rp {Number(o.total_harga||0).toLocaleString('id-ID')}</td>
                     </tr>
-                  )) : !loading ? (
+                  )) : (
                     <tr>
                       <td colSpan={4} className="py-8 text-center font-bold text-gray-400">Belum ada pemasukan pada periode ini.</td>
                     </tr>
-                  ) : (
-                    <tr><td colSpan={4} className="py-8 text-center font-bold text-gray-400">Memuat...</td></tr>
                   )}
                 </tbody>
               </table>

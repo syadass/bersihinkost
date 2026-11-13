@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AdminLayout, { useConfirmModal } from '@/components/layouts/admin'
+import { useConfirmModal } from '@/components/layouts/admin'
 
 function initials(name) {
   const parts = String(name || 'A').trim().split(/\s+/)
@@ -10,11 +10,7 @@ function initials(name) {
 }
 
 export default function LayananIndex({ userName = 'Administrator' }) {
-  return (
-    <AdminLayout>
-      <LayananIndexInner userName={userName} />
-    </AdminLayout>
-  )
+  return <LayananIndexInner userName={userName} />
 }
 
 function LayananIndexInner({ userName }) {
@@ -112,8 +108,14 @@ function LayananIndexInner({ userName }) {
 
   function openModal() {
     setEditId(null)
-    setSvcForm({ name: '', category: categoryNames[0] || '', price: '', duration_minutes: '', is_active: true, image_url: '', hapus_gambar: false })
+    const defaultCat = categoryNames[0] || ''
+    setSvcForm({ name: '', category: defaultCat, price: '', duration_minutes: '', is_active: true, image_url: '', hapus_gambar: false })
     setImageMode('url'); setImageFile(null); setPreviewSrc(''); setUploadHint('Klik untuk pilih gambar (JPG/PNG/WebP, maks 2MB)')
+    if (!defaultCat) {
+      setMsg({ ok: '', err: 'Belum ada kategori. Tambahkan kategori terlebih dahulu sebelum menambah layanan.' })
+    } else {
+      setMsg((m) => ({ ...m, err: '' }))
+    }
     setServiceModalOpen(true)
   }
   function closeModal() { setServiceModalOpen(false) }
@@ -122,11 +124,19 @@ function LayananIndexInner({ userName }) {
     const s = servicesData.find((x) => x.id == id) || services.find((x) => x.id == id)
     if (!s) return
     setEditId(id)
-    setSvcForm({ name: s.name || '', category: s.category || (categoryNames[0] || ''), price: s.price ?? '', duration_minutes: s.duration_minutes ?? '', is_active: !!s.is_active, image_url: '', hapus_gambar: false })
     const src = s.image_src || s.image_url || ''
     const isRemote = !!(s.image_url && String(s.image_url).startsWith('http'))
+    const cat = s.category || categoryNames[0] || ''
+    setSvcForm({
+      name: s.name || '',
+      category: cat,
+      price: s.price ?? '',
+      duration_minutes: s.duration_minutes ?? '',
+      is_active: !!s.is_active,
+      image_url: isRemote ? s.image_url : '',
+      hapus_gambar: false,
+    })
     setImageMode(isRemote || !src ? 'url' : 'upload')
-    setSvcForm((f) => ({ ...f, image_url: isRemote ? s.image_url : '' }))
     setImageFile(null)
     setPreviewSrc(src || '')
     setUploadHint(src && !isRemote ? 'File tersimpan — pilih file baru untuk mengganti' : 'Klik untuk pilih gambar (JPG/PNG/WebP, maks 2MB)')
@@ -140,9 +150,13 @@ function LayananIndexInner({ userName }) {
     e.preventDefault()
     setSaving(true); setMsg({ ok: '', err: '' })
     try {
+      const categoryValue = (svcForm.category || '').trim()
+      if (!categoryValue) {
+        throw new Error('Kategori wajib dipilih. Tambahkan kategori terlebih dahulu jika belum ada.')
+      }
       const fd = new FormData()
       fd.set('name', svcForm.name)
-      fd.set('category', svcForm.category)
+      fd.set('category', categoryValue)
       fd.set('price', String(svcForm.price))
       fd.set('duration_minutes', String(svcForm.duration_minutes))
       if (svcForm.is_active) fd.set('is_active', 'on')
@@ -156,7 +170,24 @@ function LayananIndexInner({ userName }) {
       const method = editId ? 'PUT' : 'POST'
       const r = await fetch(url, { method, body: fd })
       const d = await r.json().catch(() => ({}))
-      if (!r.ok) throw new Error(d.message || 'Gagal menyimpan layanan.')
+      if (!r.ok) {
+        if (Array.isArray(d)) {
+          const catIssue = d.find((x) => Array.isArray(x?.path) && x.path.includes('category'))
+          if (catIssue) throw new Error('Kategori wajib dipilih.')
+          throw new Error(d[0]?.message || 'Data layanan tidak valid.')
+        }
+        if (typeof d?.message === 'string' && d.message.trim().startsWith('[')) {
+          try {
+            const arr = JSON.parse(d.message)
+            if (Array.isArray(arr)) {
+              const catIssue = arr.find((x) => Array.isArray(x?.path) && x.path.includes('category'))
+              if (catIssue) throw new Error('Kategori wajib dipilih.')
+              throw new Error(arr[0]?.message || 'Data layanan tidak valid.')
+            }
+          } catch {}
+        }
+        throw new Error(d.message || 'Gagal menyimpan layanan.')
+      }
       setMsg({ ok: d.message || 'Berhasil.', err: '' })
       closeModal()
       await load()
@@ -300,36 +331,51 @@ function LayananIndexInner({ userName }) {
             <a href="/admin/layanan" onClick={(e) => { e.preventDefault(); router.push('/admin/layanan') }} className="text-xs font-extrabold text-red-500 hover:underline">Reset</a>
           </div>
         )}
-        <div id="servicesGrid" className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-          {services.map((s) => (
-            <div key={s.id} className="bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between group hover:shadow-lg transition-all min-w-0">
-              <div className="min-w-0">
-                <div className="w-full h-24 sm:h-36 rounded-xl sm:rounded-2xl mb-2 sm:mb-3 overflow-hidden relative bg-lavender-50">
-                  {s.image_url ? (
-                    <img src={s.image_url} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-lavender-300 text-4xl"><i className="fa-solid fa-broom"></i></div>
-                  )}
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-extrabold text-lavender-700 shadow-sm">
-                    <i className="fa-regular fa-clock mr-1"></i>{s.duration_minutes} Menit
-                  </div>
-                  <span className="absolute top-2 left-2 bg-white/95 text-lavender-700 px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-sm border border-lavender-100">{s.category}</span>
-                  {!s.is_active && <span className="absolute bottom-2 left-2 bg-white/95 text-gray-700 px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-sm border border-gray-200">NONAKTIF</span>}
+        <div id="servicesGrid" className={`grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 transition-opacity duration-300 ${loading && services.length > 0 ? 'opacity-60' : 'opacity-100'}`}>
+          {loading && services.length === 0 ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={`sk-${i}`} className="bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-card border border-lavender-50 flex flex-col animate-fade-in">
+                <div className="w-full h-24 sm:h-36 rounded-xl sm:rounded-2xl mb-2 sm:mb-3 skeleton" />
+                <div className="h-4 w-3/4 rounded-lg skeleton mb-2" />
+                <div className="h-3 w-1/2 rounded-lg skeleton mb-2" />
+                <div className="h-5 w-24 rounded-lg skeleton mb-3 sm:mb-4" />
+                <div className="flex gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t border-gray-100 mt-auto">
+                  <div className="flex-1 h-9 sm:h-10 rounded-lg sm:rounded-xl skeleton" />
+                  <div className="w-10 h-9 sm:h-10 rounded-xl skeleton" />
                 </div>
-                <h3 className="block text-xs sm:text-base font-extrabold mb-0.5 sm:mb-1 leading-tight line-clamp-2" style={{ color: '#111827' }}>{s.name || '-'}</h3>
-                <p className="text-sm sm:text-lg font-extrabold text-peach-500 mb-2 sm:mb-4 truncate">Rp{Number(s.price || 0).toLocaleString('id-ID')}</p>
               </div>
+            ))
+          ) : (
+            services.map((s) => (
+              <div key={s.id} className="bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between group hover:shadow-lg transition-all min-w-0">
+                <div className="min-w-0">
+                  <div className="w-full h-24 sm:h-36 rounded-xl sm:rounded-2xl mb-2 sm:mb-3 overflow-hidden relative bg-lavender-50">
+                    {s.image_url ? (
+                      <img src={s.image_url} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-lavender-300 text-4xl"><i className="fa-solid fa-broom"></i></div>
+                    )}
+                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-extrabold text-lavender-700 shadow-sm">
+                      <i className="fa-regular fa-clock mr-1"></i>{s.duration_minutes} Menit
+                    </div>
+                    <span className="absolute top-2 left-2 bg-white/95 text-lavender-700 px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-sm border border-lavender-100">{s.category}</span>
+                    {!s.is_active && <span className="absolute bottom-2 left-2 bg-white/95 text-gray-700 px-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-sm border border-gray-200">NONAKTIF</span>}
+                  </div>
+                  <h3 className="block text-xs sm:text-base font-extrabold mb-0.5 sm:mb-1 leading-tight line-clamp-2" style={{ color: '#111827' }}>{s.name || '-'}</h3>
+                  <p className="text-sm sm:text-lg font-extrabold text-peach-500 mb-2 sm:mb-4 truncate">Rp{Number(s.price || 0).toLocaleString('id-ID')}</p>
+                </div>
 
-              <div className="flex gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t border-gray-100">
-                <button onClick={() => editService(s.id)} className="flex-1 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-lavender-50 text-lavender-600 text-[11px] sm:text-xs font-extrabold hover:bg-lavender-100 transition-colors flex items-center justify-center gap-1.5 min-w-0">
-                  <i className="fa-solid fa-pen-to-square"></i> <span className="hidden min-[380px]:inline">Ubah</span>
-                </button>
-                <button onClick={() => deleteService(s)} className="w-10 py-2.5 rounded-xl bg-red-50 text-red-500 text-xs font-extrabold hover:bg-red-100 transition-colors flex items-center justify-center" title="Hapus Layanan">
-                  <i className="fa-solid fa-trash-can"></i>
-                </button>
+                <div className="flex gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t border-gray-100">
+                  <button onClick={() => editService(s.id)} className="flex-1 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-lavender-50 text-lavender-600 text-[11px] sm:text-xs font-extrabold hover:bg-lavender-100 transition-colors flex items-center justify-center gap-1.5 min-w-0">
+                    <i className="fa-solid fa-pen-to-square"></i> <span className="hidden min-[380px]:inline">Ubah</span>
+                  </button>
+                  <button onClick={() => deleteService(s)} className="w-10 py-2.5 rounded-xl bg-red-50 text-red-500 text-xs font-extrabold hover:bg-red-100 transition-colors flex items-center justify-center" title="Hapus Layanan">
+                    <i className="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {!loading && services.length === 0 && (

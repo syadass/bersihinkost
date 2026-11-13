@@ -13,6 +13,8 @@ const menu = [
 ]
 
 const ConfirmModalContext = createContext(null)
+const RightPanelContext = createContext(null)
+const AdminShellContext = createContext(false)
 
 export function ConfirmModalProvider({ children }) {
   const [modal, setModal] = useState({
@@ -72,6 +74,15 @@ export function useConfirmModal() {
   const ctx = useContext(ConfirmModalContext)
   if (!ctx) throw new Error('useConfirmModal harus digunakan di dalam ConfirmModalProvider')
   return ctx
+}
+
+export function useAdminRightPanel(panel) {
+  const setRightPanel = useContext(RightPanelContext)
+  useEffect(() => {
+    if (!setRightPanel) return
+    setRightPanel(panel || null)
+    return () => setRightPanel(null)
+  }, [setRightPanel, panel])
 }
 
 function AdminShell({ children, rightPanel }) {
@@ -188,9 +199,29 @@ function AdminShell({ children, rightPanel }) {
 }
 
 export default function AdminLayout({ children, rightPanel }) {
+  const insideShell = useContext(AdminShellContext)
+  const parentSetRightPanel = useContext(RightPanelContext)
+  const [localRightPanel, setLocalRightPanel] = useState(null)
+
+  useEffect(() => {
+    if (!insideShell) return
+    if (!parentSetRightPanel) return
+    if (rightPanel === undefined) return
+    parentSetRightPanel(rightPanel || null)
+    return () => parentSetRightPanel(null)
+  }, [insideShell, parentSetRightPanel, rightPanel])
+
+  if (insideShell) {
+    return <>{children}</>
+  }
+
   return (
     <ConfirmModalProvider>
-      <AdminShell rightPanel={rightPanel}>{children}</AdminShell>
+      <AdminShellContext.Provider value={true}>
+        <RightPanelContext.Provider value={setLocalRightPanel}>
+          <AdminShell rightPanel={rightPanel ?? localRightPanel}>{children}</AdminShell>
+        </RightPanelContext.Provider>
+      </AdminShellContext.Provider>
     </ConfirmModalProvider>
   )
 }

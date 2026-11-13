@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import AdminLayout, { useConfirmModal } from '@/components/layouts/admin'
+import { useConfirmModal } from '@/components/layouts/admin'
 
 const tabsDef = {
   all: { icon: 'fa-layer-group', color: '', label: 'Semua' },
@@ -48,11 +48,7 @@ function fmtTime(iso) {
 }
 
 export default function PesananIndex({ userName = 'Administrator' }) {
-  return (
-    <AdminLayout>
-      <PesananIndexInner userName={userName} />
-    </AdminLayout>
-  )
+  return <PesananIndexInner userName={userName} />
 }
 
 function PesananIndexInner({ userName }) {
@@ -73,6 +69,8 @@ function PesananIndexInner({ userName }) {
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const [menuAnchor, setMenuAnchor] = useState(null)
   const menuRef = useRef(null)
+  const reqSeqRef = useRef(0)
+  const hasLoadedRef = useRef(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -117,17 +115,23 @@ function PesananIndexInner({ userName }) {
 
   async function load() {
     if (!initialized) return
+    const seq = ++reqSeqRef.current
     setLoading(true)
     try {
       const url = `/api/orders?${fullQs({ tab, sort, search, bulan, tahun, page })}`
       const r = await fetch(url, { cache: 'no-store' })
       const d = await r.json().catch(() => ({}))
+      if (seq !== reqSeqRef.current) return
       if (!r.ok) throw new Error(d?.message || 'Gagal memuat pesanan')
       setData(d || { orders: [], counts: {}, page: 1, totalPages: 1, total: 0, years: [] })
+      hasLoadedRef.current = true
     } catch {
-      setData({ orders: [], counts: {}, page: 1, totalPages: 1, total: 0, years: [] })
+      if (seq !== reqSeqRef.current) return
+      if (!hasLoadedRef.current) {
+        setData({ orders: [], counts: {}, page: 1, totalPages: 1, total: 0, years: [] })
+      }
     } finally {
-      setLoading(false)
+      if (seq === reqSeqRef.current) setLoading(false)
     }
   }
 
@@ -320,7 +324,7 @@ function PesananIndexInner({ userName }) {
       <div className="flex-1 overflow-y-auto pb-6 sm:pr-2 min-h-0">
         {/* Mobile cards */}
         <div className="grid gap-3 md:hidden">
-          {loading ? (
+          {loading && (data.orders || []).length === 0 ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="bg-white rounded-2xl shadow-card border border-lavender-50 p-4 animate-fade-in">
                 <div className="flex items-start justify-between gap-2 mb-3">
@@ -338,7 +342,7 @@ function PesananIndexInner({ userName }) {
               </div>
             ))
           ) : (data.orders || []).length ? (
-            <div className="grid gap-3 animate-fade-in">
+            <div className={`grid gap-3 transition-opacity duration-300 ${loading ? 'opacity-60' : 'opacity-100 animate-fade-in'}`}>
               {(data.orders || []).map((order) => (
                 <Link key={order.id} href={`/admin/pesanan/${order.id}?from=${encodeURIComponent(fromUrl)}`} className="block bg-white rounded-2xl shadow-card border border-lavender-50 p-4 active:scale-[0.99] transition-all duration-200 hover:shadow-md">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -356,7 +360,7 @@ function PesananIndexInner({ userName }) {
                 </Link>
               ))}
             </div>
-          ) : (
+          ) : !loading ? (
             <div className="flex flex-col items-center justify-center text-center py-14 bg-white rounded-2xl shadow-card border border-lavender-50 animate-fade-in">
               <div className="w-16 h-16 rounded-full bg-lavender-50 text-lavender-300 flex items-center justify-center text-2xl mb-3 border-2 border-dashed border-lavender-200">
                 <i className="fa-solid fa-inbox"></i>
@@ -364,7 +368,7 @@ function PesananIndexInner({ userName }) {
               <p className="text-sm font-extrabold text-gray-700">Tidak ada pesanan ditemukan</p>
               <p className="text-[11px] font-medium text-gray-400 mt-1">Pesanan baru dari pemesan kost akan muncul di sini</p>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Desktop table */}
@@ -382,8 +386,8 @@ function PesananIndexInner({ userName }) {
                   <th className="py-4 px-6 text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="ordersTableBody" className={`divide-y divide-gray-100 text-sm font-semibold text-gray-700 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100 animate-fade-in'}`}>
-                {loading ? (
+              <tbody id="ordersTableBody" className={`divide-y divide-gray-100 text-sm font-semibold text-gray-700 transition-opacity duration-300 ${loading ? 'opacity-60' : 'opacity-100 animate-fade-in'}`}>
+                {loading && (data.orders || []).length === 0 ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={`s-${i}`}>
                       <td className="py-4 px-6"><div className="h-4 w-10 rounded-lg skeleton"></div></td>

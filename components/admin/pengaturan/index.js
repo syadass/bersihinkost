@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import AdminLayout, { useConfirmModal } from '@/components/layouts/admin'
+import { useConfirmModal } from '@/components/layouts/admin'
 
 function initials(name) {
   const parts = String(name || 'A').trim().split(/\s+/)
@@ -9,11 +9,7 @@ function initials(name) {
 }
 
 export default function PengaturanIndex() {
-  return (
-    <AdminLayout>
-      <PengaturanIndexInner />
-    </AdminLayout>
-  )
+  return <PengaturanIndexInner />
 }
 
 function PengaturanIndexInner() {

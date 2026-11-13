@@ -60,8 +60,8 @@ export async function POST(req) {
     const file = form.get('image_file')
     if (file && file.size > 0) {
       const buffer = Buffer.from(await file.arrayBuffer())
-      const ext = file.name.split('.').pop()
-      const fileName = `services/${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
+      const ext = (file.name?.split('.').pop() || 'jpg').toLowerCase()
+      const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
       const fs = await import('fs/promises')
       const path = await import('path')
       const dir = path.join(process.cwd(), 'public', 'uploads', 'services')
