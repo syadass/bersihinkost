@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #F9F8FC;
+    color: #2D3748;
+    overflow-x: hidden;
+  }
+  img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
+  }
+  img {
+    display: block;
+  }
+  input, select, textarea {
+    font-size: 14px;
+  }
+  @media (max-width: 640px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .break-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ddd6fe;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a78bfa;
+  }
+  @media print {
+    body {
+      background: #fff;
+    }
+    * {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .invoice-sheet, .laporan-sheet {
+      box-shadow: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+    @page {
+      margin: 14mm;
+    }
+    .laporan-sheet @page {
+      margin: 12mm;
+    }
+    body.printing > aside, body.printing > main {
+      display: none !important;
+    }
+    body.printing #printRoot {
+      display: block !important;
+    }
+  }
+  ::selection {
+    background: #fda4af;
+    color: #fff;
+  }
+}

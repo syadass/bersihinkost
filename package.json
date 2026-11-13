@@ -1,13 +1,35 @@
 {
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "devDependencies": {
-        "axios": "^1.6.4",
-        "laravel-vite-plugin": "^1.0.0",
-        "vite": "^5.0.0"
-    }
+  "name": "bersihinkost",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistem pemesanan jasa kebersihan kost (konversi dari Laravel ke Next.js + PostgreSQL)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.0",
+    "axios": "^1.21.1",
+    "bcryptjs": "^2.4.3",
+    "clsx": "^2.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "next": "14.2.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.2.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "laravel-vite-plugin": "^3.2.1",
+    "postcss": "^8.4.35",
+    "prisma": "^5.10.0",
+    "tailwindcss": "^3.4.1"
+  }
 }
