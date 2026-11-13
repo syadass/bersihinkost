@@ -120,56 +120,61 @@ async function getOrderYears() {
 }
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url)
-  let tab = searchParams.get('tab') || 'all'
-  let sort = searchParams.get('sort') || 'terbaru'
-  const search = searchParams.get('search') || ''
-  const bulan = searchParams.get('bulan') || 'all'
-  const tahun = searchParams.get('tahun') || 'all'
-  const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
-  const perPage = 5
+  try {
+    const { searchParams } = new URL(req.url)
+    let tab = searchParams.get('tab') || 'all'
+    let sort = searchParams.get('sort') || 'terbaru'
+    const search = searchParams.get('search') || ''
+    const bulan = searchParams.get('bulan') || 'all'
+    const tahun = searchParams.get('tahun') || 'all'
+    const page = Math.max(parseInt(searchParams.get('page') || '1', 10), 1)
+    const perPage = 5
 
-  if (!ALLOWED_SORTS.includes(sort)) sort = 'terbaru'
-  if (!TAB_MAP[tab] && tab !== 'all') tab = 'all'
+    if (!ALLOWED_SORTS.includes(sort)) sort = 'terbaru'
+    if (!TAB_MAP[tab] && tab !== 'all') tab = 'all'
 
-  let where = {}
-  if (TAB_MAP[tab]) {
-    where.status = { in: TAB_MAP[tab] }
+    let where = {}
+    if (TAB_MAP[tab]) {
+      where.status = { in: TAB_MAP[tab] }
+    }
+    if (search) {
+      where.OR = [
+        { customer_name: { contains: search, mode: 'insensitive' } },
+        { alamat: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+    where = applyPeriode(where, bulan, tahun)
+
+    const [orders, total, counts, years] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: { items: true },
+        orderBy: getOrderBy(sort),
+        skip: (page - 1) * perPage,
+        take: perPage,
+      }),
+      prisma.order.count({ where }),
+      getCounts(),
+      getOrderYears(),
+    ])
+
+    return Response.json({
+      orders,
+      counts,
+      tab,
+      sort,
+      page,
+      perPage,
+      total,
+      totalPages: Math.ceil(total / perPage),
+      years,
+      fBulan: bulan,
+      fTahun: tahun,
+    })
+  } catch (err) {
+    console.error('GET /api/orders error:', err)
+    return Response.json({ message: err?.message || 'Gagal memuat pesanan.' }, { status: 500 })
   }
-  if (search) {
-    where.OR = [
-      { customer_name: { contains: search, mode: 'insensitive' } },
-      { alamat: { contains: search, mode: 'insensitive' } },
-    ]
-  }
-  where = applyPeriode(where, bulan, tahun)
-
-  const [orders, total, counts, years] = await Promise.all([
-    prisma.order.findMany({
-      where,
-      include: { items: true },
-      orderBy: getOrderBy(sort),
-      skip: (page - 1) * perPage,
-      take: perPage,
-    }),
-    prisma.order.count({ where }),
-    getCounts(),
-    getOrderYears(),
-  ])
-
-  return Response.json({
-    orders,
-    counts,
-    tab,
-    sort,
-    page,
-    perPage,
-    total,
-    totalPages: Math.ceil(total / perPage),
-    years,
-    fBulan: bulan,
-    fTahun: tahun,
-  })
 }
 
 export async function POST(req) {

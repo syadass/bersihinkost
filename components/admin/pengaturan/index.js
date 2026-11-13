@@ -123,11 +123,22 @@ function PengaturanIndexInner() {
     e.preventDefault()
     setSaving((s) => ({ ...s, akun: true })); setAccountErrors([])
     try {
+      const errs = []
+      if ((account.email || '') !== (account.email_confirmation || '')) errs.push('Konfirmasi email tidak sama.')
+      if ((account.password || '') || (account.password_confirmation || '')) {
+        if ((account.password || '').length < 8) errs.push('Kata sandi minimal 8 karakter.')
+        if ((account.password || '') !== (account.password_confirmation || '')) errs.push('Konfirmasi kata sandi tidak sama.')
+      }
+      if (errs.length) {
+        setAccountErrors(errs)
+        return
+      }
+
       const r = await fetch('/api/settings?action=account', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(account) })
       const d = await r.json().catch(() => ({}))
       if (!r.ok) {
-        const errs = d.errors ? Object.values(d.errors).flat() : [d.message || 'Gagal menyimpan.']
-        setAccountErrors(errs)
+        const apiErrs = d.errors ? Object.values(d.errors).flat() : [d.message || 'Gagal menyimpan.']
+        setAccountErrors(apiErrs)
       } else {
         window.location.reload()
         return

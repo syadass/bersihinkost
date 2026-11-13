@@ -3,11 +3,16 @@ import bcrypt from 'bcryptjs'
 import { profilSchema, operasionalSchema, accountSchema } from '@/lib/validations'
 
 export async function GET() {
-  const setting = await prisma.setting.findUnique({ where: { id: 1 } })
-  return Response.json({ setting })
+  try {
+    const setting = await prisma.setting.findUnique({ where: { id: 1 } })
+    return Response.json({ setting })
+  } catch (err) {
+    console.error('GET /api/settings error:', err)
+    return Response.json({ message: err?.message || 'Gagal memuat pengaturan.' }, { status: 500 })
+  }
 }
 
-export async function PUT(req) {
+async function handleUpdate(req) {
   try {
     const { searchParams } = new URL(req.url)
     const action = searchParams.get('action') || 'profil'
@@ -44,7 +49,17 @@ export async function PUT(req) {
 
     if (action === 'account') {
       const body = await req.json()
-      const data = accountSchema.parse(body)
+      const parsed = accountSchema.safeParse(body)
+      if (!parsed.success) {
+        const errors = {}
+        for (const issue of parsed.error.issues || []) {
+          const key = issue.path?.[0] || 'form'
+          if (!errors[key]) errors[key] = []
+          errors[key].push(issue.message)
+        }
+        return Response.json({ message: 'Data akun tidak valid.', errors }, { status: 422 })
+      }
+      const data = parsed.data
       const user = await prisma.user.findFirst({ orderBy: { id: 'asc' } })
       if (!user) {
         return Response.json({ message: 'User tidak ditemukan.' }, { status: 404 })
@@ -62,6 +77,15 @@ export async function PUT(req) {
 
     return Response.json({ message: 'Aksi tidak dikenal.' }, { status: 400 })
   } catch (err) {
-    return Response.json({ message: err.message || 'Gagal menyimpan pengaturan.' }, { status: 400 })
+    console.error('UPDATE /api/settings error:', err)
+    return Response.json({ message: err?.message || 'Gagal menyimpan pengaturan.' }, { status: 400 })
   }
+}
+
+export async function PUT(req) {
+  return handleUpdate(req)
+}
+
+export async function POST(req) {
+  return handleUpdate(req)
 }
