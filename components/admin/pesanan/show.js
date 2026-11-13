@@ -160,7 +160,7 @@ function PesananShowInner({ params }) {
       </div>
     </div>
   )
-  if (!order) return <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-6"><div className="max-w-4xl mx-auto text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div></div>
+  if (!order) return <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-32 sm:pb-36 lg:pb-6"><div className="max-w-4xl mx-auto text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div></div>
 
   const sc = statusConfig[order.status] || statusConfig.pending
   const editable = !['cancelled', 'completed'].includes(order.status)
@@ -169,7 +169,7 @@ function PesananShowInner({ params }) {
 
   return (
     <>
-      <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-6">
+      <div className="h-full overflow-y-auto pr-1 sm:pr-2 pb-32 sm:pb-36 lg:pb-6">
         <div className="max-w-4xl mx-auto">
           {msg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 mb-4 w-full"><i className="fa-solid fa-circle-check"></i> {msg}</div>}
           {error && <div className="bg-red-50 border border-red-200 text-red-600 px-5 py-3 rounded-2xl text-sm font-bold mb-4 w-full">{error}</div>}

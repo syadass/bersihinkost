@@ -178,7 +178,7 @@ export default function Dashboard({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-6 pr-1 sm:pr-2 min-h-0 space-y-5">
+      <div className="flex-1 overflow-y-auto pb-0 lg:pb-6 pr-1 sm:pr-2 min-h-0 space-y-5">
         {/* 1. Stat Cards */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-gradient-to-br from-peach-400 to-peach-500 rounded-3xl shadow-card p-4 sm:p-5 text-white relative overflow-hidden">
@@ -427,7 +427,7 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
   const from = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search || '/admin') : encodeURIComponent('/admin')
 
   return (
-    <aside className="w-full xl:w-[380px] shrink-0 bg-white rounded-[2rem] xl:rounded-[2.5rem] shadow-float flex flex-col z-10 overflow-hidden border border-lavender-50 lg:max-h-full">
+    <aside className="w-full xl:w-[380px] shrink-0 bg-white rounded-3xl xl:rounded-[2.5rem] shadow-card flex flex-col z-10 overflow-hidden border border-lavender-50 lg:max-h-full">
       {/* Header Panel */}
       <div className="px-6 sm:px-7 pt-6 sm:pt-7 pb-4 bg-white">
         <div className="flex justify-between items-center mb-2">
@@ -495,7 +495,7 @@ export function DashboardRightPanel({ pendingCount, pendingTotal, pendingOrders,
       </div>
 
       {/* Summary & Action Button */}
-      <div className="p-5 sm:p-6 bg-gray-50/50 border-t border-gray-100 rounded-t-[2rem]">
+      <div className="p-5 sm:p-6 pb-16 sm:pb-20 lg:pb-6 bg-gray-50/50 border-t border-gray-100 rounded-t-[2rem]">
         <div className="flex justify-between items-center text-sm font-bold text-gray-500 mb-4">
           <span>Order Menunggu ACC</span>
           <span>{pendingCount} order</span>

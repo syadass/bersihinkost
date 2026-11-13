@@ -327,7 +327,7 @@ function LayananIndexInner({ userName }) {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-6 pr-2 min-h-0">
+      <div className="flex-1 overflow-y-auto pb-32 sm:pb-36 lg:pb-6 pr-2 min-h-0">
         {(search || category !== 'all') && (
           <div className="flex items-center gap-3 mb-4">
             <p className="text-xs font-bold text-gray-400">

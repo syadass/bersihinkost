@@ -143,13 +143,13 @@ function AdminShell({ children, rightPanel }) {
   return (
     <>
       <Script src="https://cdn.jsdelivr.net/npm/chart.js" strategy="afterInteractive" />
-      <div className="min-h-screen lg:h-screen w-full flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden p-3 sm:p-5 gap-3 sm:gap-5 selection:bg-peach-400 selection:text-white">
-        <aside className="fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-5 sm:right-5 lg:static lg:w-24 bg-gradient-to-r lg:bg-gradient-to-b from-lavender-600/90 to-lavender-800/90 lg:from-lavender-600 lg:to-lavender-800 rounded-2xl sm:rounded-3xl lg:rounded-[3rem] flex flex-row lg:flex-col items-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 lg:py-8 lg:px-0 shadow-float shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)] lg:shadow-float z-40 text-white shrink-0">
+      <div className="min-h-screen lg:h-screen w-full flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden p-3 sm:p-5 gap-4 sm:gap-5 selection:bg-peach-400 selection:text-white">
+        <aside className="fixed bottom-3 sm:bottom-5 left-3 right-3 sm:left-5 sm:right-5 lg:static lg:w-24 bg-gradient-to-r lg:bg-gradient-to-b from-lavender-600/90 to-lavender-800/90 lg:from-lavender-600 lg:to-lavender-800 rounded-2xl sm:rounded-3xl lg:rounded-[3rem] flex flex-row lg:flex-col items-center justify-between lg:justify-start gap-0 lg:gap-0 px-4 sm:px-6 lg:px-0 py-2.5 sm:py-3 lg:py-8 shadow-float shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)] lg:shadow-float z-40 text-white shrink-0">
           <Link href="/admin" className="w-10 h-10 sm:w-11 sm:h-11 lg:w-14 lg:h-14 shrink-0 bg-white/20 rounded-full flex items-center justify-center lg:mb-8 backdrop-blur-md border border-white/30 shadow-inner">
             <i className="fa-solid fa-broom text-lg sm:text-xl lg:text-2xl text-white"></i>
           </Link>
 
-          <nav className="flex flex-row lg:flex-col gap-1.5 sm:gap-2 lg:gap-6 w-auto lg:w-full items-center flex-1 justify-center lg:justify-start overflow-x-auto scrollbar-hide px-1">
+          <div className="contents lg:flex lg:flex-col lg:items-center lg:gap-6 lg:w-full lg:flex-1 lg:justify-start">
             {menu.map((m) => {
               const active = m.match(pathname)
               return (
@@ -158,23 +158,24 @@ function AdminShell({ children, rightPanel }) {
                 </Link>
               )
             })}
-          </nav>
+          </div>
 
-          <div className="flex flex-row lg:flex-col gap-1.5 sm:gap-2 lg:gap-4 mt-0 lg:mt-auto shrink-0">
-            <button onClick={handleLogout} title="Keluar dari Dashboard" className="w-10 h-10 sm:w-11 sm:h-11 lg:w-14 lg:h-14 text-lavender-200 hover:bg-white/10 rounded-2xl lg:rounded-3xl flex items-center justify-center transition-colors">
-              <i className="fa-solid fa-right-from-bracket text-xl"></i>
-            </button>
+          <div className="contents lg:flex lg:flex-col lg:items-center lg:gap-4 lg:mt-auto">
             <Link href="/admin/pengaturan" title="Pengaturan" className={itemClass(pathname.startsWith('/admin/pengaturan'))}>
               <i className="fa-solid fa-gear text-xl"></i>
             </Link>
+            <button onClick={handleLogout} title="Keluar dari Dashboard" className="w-10 h-10 sm:w-11 sm:h-11 lg:w-14 lg:h-14 text-lavender-200 hover:bg-white/10 rounded-2xl lg:rounded-3xl flex items-center justify-center transition-colors">
+              <i className="fa-solid fa-right-from-bracket text-xl"></i>
+            </button>
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col min-w-0 w-full bg-transparent overflow-visible pt-2 lg:pt-0 pb-24 sm:pb-28 lg:pb-0">
+        <main className="flex-1 flex flex-col min-w-0 w-full bg-transparent overflow-visible pt-2 lg:pt-0 pb-0 lg:pb-0">
           {children}
         </main>
 
         {rightPanel}
+        <div className="h-1 sm:h-2 lg:hidden shrink-0" aria-hidden="true" />
       </div>
       {notif ? (
         <div className="fixed bottom-24 sm:bottom-28 lg:bottom-4 right-4 z-[90] max-w-sm w-[calc(100vw-2rem)] bg-white border border-amber-200 shadow-float rounded-2xl p-4">

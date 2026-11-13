@@ -1,14 +1,19 @@
 {
   "pages": {
-    "/admin/pesanan/page": [
+    "/admin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/pesanan/page.js"
+      "static/chunks/app/admin/page.js"
     ],
     "/admin/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/admin/layout.js"
+    ],
+    "/admin/loading": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/loading.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -16,45 +21,25 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/admin/layanan/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/layanan/page.js"
-    ],
-    "/admin/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/page.js"
-    ],
-    "/admin/pesanan/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/pesanan/[id]/page.js"
-    ],
-    "/admin/pengaturan/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/pengaturan/page.js"
-    ],
-    "/admin/loading": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/loading.js"
-    ],
     "/loading": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/loading.js"
     ],
-    "/login/page": [
+    "/admin/pesanan/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/login/page.js"
+      "static/chunks/app/admin/pesanan/page.js"
     ],
-    "/page": [
+    "/admin/layanan/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/admin/layanan/page.js"
+    ],
+    "/admin/pengaturan/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/pengaturan/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",

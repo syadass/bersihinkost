@@ -185,7 +185,7 @@ function PengaturanIndexInner() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-6 sm:pr-2 min-h-0">
+      <div className="flex-1 overflow-y-auto pb-32 sm:pb-36 lg:pb-6 sm:pr-2 min-h-0">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
 
           <form onSubmit={saveProfil} className="bg-white p-4 sm:p-6 rounded-3xl shadow-card border border-lavender-50 flex flex-col justify-between min-w-0">

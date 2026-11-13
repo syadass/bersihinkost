@@ -326,7 +326,7 @@ function PesananIndexInner({ userName }) {
       </div>
 
       {/* Orders Table / List Container */}
-      <div className="flex-1 overflow-y-auto pb-6 sm:pr-2 min-h-0">
+      <div className="flex-1 overflow-y-auto pb-32 sm:pb-36 lg:pb-6 sm:pr-2 min-h-0">
         {/* Mobile cards */}
         <div className="grid gap-3 md:hidden">
           {loading && (data.orders || []).length === 0 ? (

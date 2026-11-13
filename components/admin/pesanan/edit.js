@@ -95,10 +95,10 @@ export default function PesananEdit({ params }) {
       </div>
     </div>
   )
-  if (!order) return <div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div>
+  if (!order) return <div className="h-full overflow-y-auto pr-1 pt-2 pb-32 sm:pb-36 lg:pb-6 max-w-3xl text-center py-16 text-gray-400 font-bold">Pesanan tidak ditemukan.</div>
 
   return (
-      <div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl">
+      <div className="h-full overflow-y-auto pr-1 pt-2 pb-32 sm:pb-36 lg:pb-6 max-w-3xl">
         <Link href={backToDetail} className="text-xs font-extrabold text-lavender-500">← Kembali ke detail</Link>
         <h1 className="text-2xl font-extrabold text-gray-800 mt-1">Ubah Pesanan #{id}</h1>
 

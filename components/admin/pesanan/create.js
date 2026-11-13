@@ -58,7 +58,7 @@ export default function PesananCreate() {
   }
 
   return (
-    <div className="h-full overflow-y-auto pr-1 pt-2 pb-6 max-w-3xl">
+    <div className="h-full overflow-y-auto pr-1 pt-2 pb-32 sm:pb-36 lg:pb-6 max-w-3xl">
       <Link href="/admin/pesanan" className="text-xs font-extrabold text-lavender-500">← Kembali ke daftar</Link>
       <h1 className="text-2xl font-extrabold text-gray-800 mt-1">Buat Jadwal Manual</h1>
       <p className="text-sm font-bold text-lavender-500">Order walk-in / telepon — langsung tercatat <span className="text-emerald-500">Confirmed</span></p>
