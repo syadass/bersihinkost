@@ -55,6 +55,9 @@ function LayananIndexInner({ userName }) {
       if (search) qs.set('search', search)
       const r = await fetch(`/api/services?${qs.toString()}`, { cache: 'no-store' })
       const d = await r.json().catch(() => ({}))
+      if (!r.ok) {
+        throw new Error(d?.message || 'Gagal memuat layanan.')
+      }
       const svcs = Array.isArray(d.services) ? d.services : []
       setServices(svcs)
       setServicesData(Array.isArray(d.servicesData) ? d.servicesData : svcs.map((s) => ({
@@ -66,21 +69,19 @@ function LayananIndexInner({ userName }) {
       const cd = await cr.json().catch(() => ({}))
       const cats = Array.isArray(cd.categories) ? cd.categories : []
       // enrich counts
-      const countMap = {}
-      for (const s of svcs) countMap[s.category] = (countMap[s.category] || 0) + 1
-      // but we need counts across all? easier compute from full list fetch
       let all = svcs
       if (category !== 'all' || search) {
         const ar = await fetch('/api/services', { cache: 'no-store' })
         const ad = await ar.json().catch(() => ({}))
-        all = Array.isArray(ad.services) ? ad.services : svcs
+        if (ar.ok) all = Array.isArray(ad.services) ? ad.services : svcs
       }
       const counts = {}
       for (const s of all) counts[s.category] = (counts[s.category] || 0) + 1
       setCategories(cats.map((c) => ({ ...c, services_count: counts[c.name] ?? c.service_count ?? 0 })))
       setCategoryNames(cats.map((c) => c.name))
-    } catch {
-      // ignore
+      setMsg((m) => ({ ...m, err: '' }))
+    } catch (err) {
+      setMsg((m) => ({ ok: '', err: err?.message || 'Gagal memuat layanan.' }))
     } finally {
       setLoading(false)
     }

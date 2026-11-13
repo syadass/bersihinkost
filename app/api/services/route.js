@@ -2,44 +2,49 @@ import prisma from '@/lib/prisma'
 import { serviceSchema } from '@/lib/validations'
 
 export async function GET(req) {
-  const { searchParams } = new URL(req.url)
-  const category = searchParams.get('category') || 'all'
-  const search = searchParams.get('search') || ''
+  try {
+    const { searchParams } = new URL(req.url)
+    const category = searchParams.get('category') || 'all'
+    const search = searchParams.get('search') || ''
 
-  let where = { is_active: true }
-  if (category !== 'all') where.category = category
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { category: { contains: search, mode: 'insensitive' } },
-    ]
+    let where = { is_active: true }
+    if (category !== 'all') where.category = category
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
+    const services = await prisma.service.findMany({
+      where,
+      orderBy: { id: 'asc' },
+      include: { _count: { select: { order_items: true } } },
+    })
+
+    const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } })
+
+    return Response.json({
+      services,
+      servicesData: services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        category: s.category,
+        price: s.price,
+        duration_minutes: s.duration_minutes,
+        image_url: s.image_url,
+        is_active: s.is_active,
+        used_count: s._count.order_items,
+      })),
+      categories,
+      categoryNames: categories.map((c) => c.name),
+      category,
+      search,
+    })
+  } catch (err) {
+    console.error('GET /api/services error:', err)
+    return Response.json({ message: err?.message || 'Gagal memuat layanan.', code: err?.code || null }, { status: 500 })
   }
-
-  const services = await prisma.service.findMany({
-    where,
-    orderBy: { id: 'asc' },
-    include: { _count: { select: { order_items: true } } },
-  })
-
-  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } })
-
-  return Response.json({
-    services,
-    servicesData: services.map((s) => ({
-      id: s.id,
-      name: s.name,
-      category: s.category,
-      price: s.price,
-      duration_minutes: s.duration_minutes,
-      image_url: s.image_url,
-      is_active: s.is_active,
-      used_count: s._count.order_items,
-    })),
-    categories,
-    categoryNames: categories.map((c) => c.name),
-    category,
-    search,
-  })
 }
 
 export async function POST(req) {
